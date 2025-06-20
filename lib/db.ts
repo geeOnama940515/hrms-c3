@@ -8,10 +8,17 @@ const pool = new Pool({
 });
 
 export const query = async (text: string, params?: any[]) => {
+  console.log('📡 DB: Executing query:', text.substring(0, 100) + '...');
+  console.log('📡 DB: Query params:', params);
+  
   const client = await pool.connect();
   try {
     const result = await client.query(text, params);
+    console.log('✅ DB: Query successful, rows returned:', result.rows.length);
     return result;
+  } catch (error) {
+    console.error('❌ DB: Query failed:', error);
+    throw error;
   } finally {
     client.release();
   }

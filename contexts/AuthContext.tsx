@@ -18,24 +18,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('🔄 AuthProvider: Checking stored user...');
-    // Check if user is stored in localStorage
-    try {
-      const storedUser = localStorage.getItem('hrms_user');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        console.log('👤 AuthProvider: Found stored user:', parsedUser);
-        setUser(parsedUser);
-      } else {
-        console.log('👤 AuthProvider: No stored user found');
+    console.log('🔄 AuthProvider: useEffect triggered - checking stored user...');
+    
+    const checkStoredUser = () => {
+      try {
+        const storedUser = localStorage.getItem('hrms_user');
+        console.log('🔍 AuthProvider: localStorage check result:', storedUser ? 'User found' : 'No user');
+        
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          console.log('👤 AuthProvider: Parsed stored user:', parsedUser);
+          setUser(parsedUser);
+        } else {
+          console.log('👤 AuthProvider: No stored user found');
+        }
+      } catch (error) {
+        console.error('❌ AuthProvider: Error parsing stored user:', error);
+        localStorage.removeItem('hrms_user');
+      } finally {
+        console.log('✅ AuthProvider: Setting isLoading to false');
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('❌ AuthProvider: Error parsing stored user:', error);
-      localStorage.removeItem('hrms_user');
-    } finally {
-      setIsLoading(false);
-      console.log('✅ AuthProvider: Initial loading complete');
-    }
+    };
+
+    // Add a small delay to ensure localStorage is available
+    const timer = setTimeout(checkStoredUser, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -99,7 +108,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading
   };
 
-  console.log('🔄 AuthContext: Current state:', { user: user?.email || 'none', isLoading });
+  console.log('🔄 AuthContext: Current state:', { 
+    user: user?.email || 'none', 
+    isLoading,
+    hasUser: !!user 
+  });
 
   return (
     <AuthContext.Provider value={value}>
