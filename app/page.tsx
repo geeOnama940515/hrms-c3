@@ -6,6 +6,7 @@ import LoginForm from '@/components/auth/LoginForm';
 import Sidebar from '@/components/layout/Sidebar';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import RecentActivity from '@/components/dashboard/RecentActivity';
+import UpcomingBirthdays from '@/components/dashboard/UpcomingBirthdays';
 import EmployeeList from '@/components/employees/EmployeeList';
 import EmployeeProfile from '@/components/employees/EmployeeProfile';
 import EmployeeForm from '@/components/employees/EmployeeForm';
@@ -312,6 +313,9 @@ function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <RecentActivity />
           <div className="space-y-6">
+            {/* Upcoming Birthdays */}
+            <UpcomingBirthdays />
+            
             {/* Quick Actions */}
             <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border">
               <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
