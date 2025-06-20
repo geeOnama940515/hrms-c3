@@ -74,23 +74,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(data.user);
           localStorage.setItem('hrms_user', JSON.stringify(data.user));
           console.log('💾 AuthContext: User saved to localStorage');
+          setIsLoading(false); // Explicitly set loading to false on successful login
+          console.log('✅ AuthContext: isLoading set to false after successful login');
           return true;
         } else {
           console.log('❌ AuthContext: No user in response data');
+          setIsLoading(false);
           return false;
         }
       } else {
         console.log('❌ AuthContext: Response not OK');
         const errorData = await response.text();
         console.log('❌ AuthContext: Error response:', errorData);
+        setIsLoading(false);
         return false;
       }
     } catch (error) {
       console.error('❌ AuthContext: Login error:', error);
-      return false;
-    } finally {
       setIsLoading(false);
-      console.log('🔄 AuthContext: Login process completed, isLoading set to false');
+      return false;
     }
   };
 
@@ -98,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('🚪 AuthContext: Logout called');
     setUser(null);
     localStorage.removeItem('hrms_user');
+    setIsLoading(false); // Ensure loading is false after logout
     console.log('✅ AuthContext: User logged out and localStorage cleared');
   };
 
