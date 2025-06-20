@@ -18,6 +18,7 @@ export const query = async (text: string, params?: any[]) => {
     return result;
   } catch (error) {
     console.error('❌ DB: Query failed:', error);
+    console.error('❌ DB: Error details:', error instanceof Error ? error.message : 'Unknown error');
     throw error;
   } finally {
     client.release();

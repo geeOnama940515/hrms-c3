@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Login API: Authenticate result:', user ? 'User found' : 'No user found');
 
     if (user) {
-      console.log('✅ Login API: Authentication successful, returning user');
+      console.log('✅ Login API: Authentication successful, returning user:', user);
       return NextResponse.json({ user }, { status: 200 });
     } else {
       console.log('❌ Login API: Invalid credentials');
@@ -34,8 +34,9 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('❌ Login API: Error occurred:', error);
+    console.error('❌ Login API: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

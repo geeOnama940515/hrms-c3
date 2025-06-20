@@ -16,9 +16,6 @@ const mapRowToUser = (row: any): User => ({
 export const authenticate = async (email: string, password: string): Promise<User | null> => {
   console.log('🔍 Auth: authenticate function called with email:', email);
   
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
   try {
     console.log('📡 Auth: Querying database for user...');
     const result = await query(
@@ -47,12 +44,15 @@ export const authenticate = async (email: string, password: string): Promise<Use
       console.log('👤 Auth: Mapped user:', mappedUser);
       return mappedUser;
     } else {
-      console.log('❌ Auth: Password incorrect');
+      console.log('❌ Auth: Password incorrect for user:', email);
+      console.log('❌ Auth: Expected: password123, Received:', password);
       return null;
     }
     
   } catch (error) {
     console.error('❌ Auth: Database error:', error);
+    console.error('❌ Auth: Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('❌ Auth: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return null;
   }
 };
