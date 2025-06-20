@@ -1,4 +1,4 @@
-import { LeaveApplication, LeaveBalance, LeaveType, LeaveStatus, Employee } from '@/types';
+import { LeaveApplication, LeaveBalance, LeaveType, LeaveStatus, Employee, LeaveDay } from '@/types';
 import { mockEmployees, getEmployeeDisplayData } from './employees';
 
 // Mock leave balances - simplified to track only paid leave
@@ -61,7 +61,7 @@ export const mockLeaveBalances: LeaveBalance[] = [
   }
 ];
 
-// Mock leave applications - updated with isPaid field
+// Mock leave applications - updated with detailed leave days
 export const mockLeaveApplications: LeaveApplication[] = [
   {
     id: '1',
@@ -70,8 +70,16 @@ export const mockLeaveApplications: LeaveApplication[] = [
     startDate: '2024-02-15',
     endDate: '2024-02-19',
     totalDays: 5,
-    isPaid: true,
-    reason: 'Family vacation to Boracay',
+    paidDays: 3,
+    unpaidDays: 2,
+    leaveDays: [
+      { date: '2024-02-15', isPaid: true },
+      { date: '2024-02-16', isPaid: true },
+      { date: '2024-02-17', isPaid: false },
+      { date: '2024-02-18', isPaid: false },
+      { date: '2024-02-19', isPaid: true }
+    ],
+    reason: 'Family vacation to Boracay - need some unpaid days to extend the trip',
     status: 'Approved',
     appliedDate: '2024-02-01T08:00:00Z',
     departmentHeadApproval: {
@@ -94,7 +102,12 @@ export const mockLeaveApplications: LeaveApplication[] = [
     startDate: '2024-01-25',
     endDate: '2024-01-26',
     totalDays: 2,
-    isPaid: true,
+    paidDays: 2,
+    unpaidDays: 0,
+    leaveDays: [
+      { date: '2024-01-25', isPaid: true },
+      { date: '2024-01-26', isPaid: true }
+    ],
     reason: 'Flu symptoms and fever',
     status: 'Approved_by_Department',
     appliedDate: '2024-01-24T09:00:00Z',
@@ -111,10 +124,16 @@ export const mockLeaveApplications: LeaveApplication[] = [
     employeeId: '3',
     leaveType: 'Personal',
     startDate: '2024-03-01',
-    endDate: '2024-03-01',
-    totalDays: 1,
-    isPaid: false,
-    reason: 'Personal matters to attend to',
+    endDate: '2024-03-03',
+    totalDays: 3,
+    paidDays: 1,
+    unpaidDays: 2,
+    leaveDays: [
+      { date: '2024-03-01', isPaid: true },
+      { date: '2024-03-02', isPaid: false },
+      { date: '2024-03-03', isPaid: false }
+    ],
+    reason: 'Personal matters to attend to - only need one paid day',
     status: 'Pending',
     appliedDate: '2024-02-20T10:00:00Z',
     createdAt: '2024-02-20T10:00:00Z',
@@ -216,6 +235,12 @@ export const updateLeaveApplication = async (
   };
   
   mockLeaveApplications[index] = updatedApplication;
+  
+  // Update leave balance if it's approved and has paid days
+  if (updatedApplication.status === 'Approved' && updatedApplication.paidDays > 0) {
+    await updateLeaveBalance(updatedApplication.employeeId, updatedApplication.paidDays);
+  }
+  
   return getLeaveApplicationDisplayData(updatedApplication);
 };
 
@@ -272,9 +297,9 @@ export const acknowledgeLeaveByHR = async (
   
   mockLeaveApplications[index] = updatedApplication;
   
-  // Update leave balance if it's a paid leave
-  if (updatedApplication.isPaid) {
-    await updateLeaveBalance(updatedApplication.employeeId, updatedApplication.totalDays);
+  // Update leave balance for paid days when fully approved
+  if (updatedApplication.paidDays > 0) {
+    await updateLeaveBalance(updatedApplication.employeeId, updatedApplication.paidDays);
   }
   
   return getLeaveApplicationDisplayData(updatedApplication);
@@ -320,7 +345,7 @@ export const getLeaveBalance = async (employeeId: string, year: number = new Dat
 
 export const updateLeaveBalance = async (
   employeeId: string,
-  daysUsed: number,
+  paidDaysUsed: number,
   year: number = new Date().getFullYear()
 ): Promise<LeaveBalance> => {
   await new Promise(resolve => setTimeout(resolve, 500));
@@ -340,7 +365,7 @@ export const updateLeaveBalance = async (
   }
   
   // Update used paid leave
-  balance.usedPaidLeave += daysUsed;
+  balance.usedPaidLeave += paidDaysUsed;
   
   return balance;
 };
@@ -352,6 +377,18 @@ export const calculateLeaveDays = (startDate: string, endDate: string): number =
   const diffTime = Math.abs(end.getTime() - start.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end dates
   return diffDays;
+};
+
+export const generateLeaveDaysArray = (startDate: string, endDate: string): string[] => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const days: string[] = [];
+  
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    days.push(d.toISOString().split('T')[0]);
+  }
+  
+  return days;
 };
 
 export const getAvailablePaidLeave = (balance: LeaveBalance): number => {

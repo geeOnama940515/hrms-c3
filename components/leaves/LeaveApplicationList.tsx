@@ -112,8 +112,9 @@ export default function LeaveApplicationList({
     const matchesStatus = statusFilter === 'all' || leave.status === statusFilter;
     const matchesType = typeFilter === 'all' || leave.leaveType === typeFilter;
     const matchesPaid = paidFilter === 'all' || 
-      (paidFilter === 'paid' && leave.isPaid) || 
-      (paidFilter === 'unpaid' && !leave.isPaid);
+      (paidFilter === 'paid' && leave.paidDays > 0) || 
+      (paidFilter === 'unpaid' && leave.paidDays === 0) ||
+      (paidFilter === 'mixed' && leave.paidDays > 0 && leave.unpaidDays > 0);
 
     return matchesSearch && matchesStatus && matchesType && matchesPaid;
   });
@@ -174,6 +175,31 @@ export default function LeaveApplicationList({
   const canDeleteLeave = (leave: LeaveApplication): boolean => {
     // Only the applicant can delete, and only if it's still pending
     return leave.status === 'Pending' && leave.employeeId === '1'; // In real app, check against user ID
+  };
+
+  const getPaidStatusBadge = (leave: LeaveApplication) => {
+    if (leave.paidDays > 0 && leave.unpaidDays > 0) {
+      return (
+        <Badge className="bg-blue-100 text-blue-800">
+          <DollarSign className="h-3 w-3 mr-1" />
+          Mixed ({leave.paidDays}P/{leave.unpaidDays}U)
+        </Badge>
+      );
+    } else if (leave.paidDays > 0) {
+      return (
+        <Badge className="bg-green-100 text-green-800">
+          <DollarSign className="h-3 w-3 mr-1" />
+          Paid ({leave.paidDays})
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-gray-100 text-gray-800">
+          <Ban className="h-3 w-3 mr-1" />
+          Unpaid ({leave.unpaidDays})
+        </Badge>
+      );
+    }
   };
 
   if (loading) {
@@ -257,8 +283,9 @@ export default function LeaveApplicationList({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Leave Types</SelectItem>
-                <SelectItem value="paid">Paid Leave</SelectItem>
-                <SelectItem value="unpaid">Unpaid Leave</SelectItem>
+                <SelectItem value="paid">Fully Paid</SelectItem>
+                <SelectItem value="unpaid">Fully Unpaid</SelectItem>
+                <SelectItem value="mixed">Mixed (Paid + Unpaid)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -308,19 +335,7 @@ export default function LeaveApplicationList({
                           {getStatusIcon(leave.status)}
                           <span>{getStatusDisplayName(leave.status)}</span>
                         </Badge>
-                        <Badge className={leave.isPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                          {leave.isPaid ? (
-                            <>
-                              <DollarSign className="h-3 w-3 mr-1" />
-                              Paid
-                            </>
-                          ) : (
-                            <>
-                              <Ban className="h-3 w-3 mr-1" />
-                              Unpaid
-                            </>
-                          )}
-                        </Badge>
+                        {getPaidStatusBadge(leave)}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                         <div className="flex items-center space-x-1 text-gray-600">
@@ -329,7 +344,7 @@ export default function LeaveApplicationList({
                         </div>
                         <div className="flex items-center space-x-1 text-gray-600">
                           <Clock className="h-3 w-3" />
-                          <span>{leave.totalDays} day{leave.totalDays > 1 ? 's' : ''}</span>
+                          <span>{leave.totalDays} day{leave.totalDays > 1 ? 's' : ''} total</span>
                         </div>
                         <div className="flex items-center space-x-1 text-gray-600">
                           <span>Applied: {formatDate(leave.appliedDate)}</span>

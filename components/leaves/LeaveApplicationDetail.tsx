@@ -75,6 +75,14 @@ export default function LeaveApplicationDetail({
     });
   };
 
+  const formatDateShort = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-PH', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   const handleApprove = async () => {
     if (!user) return;
     
@@ -169,6 +177,31 @@ export default function LeaveApplicationDetail({
     }
   };
 
+  const getPaidStatusBadge = (leave: LeaveApplication) => {
+    if (leave.paidDays > 0 && leave.unpaidDays > 0) {
+      return (
+        <Badge className="bg-blue-100 text-blue-800">
+          <DollarSign className="h-3 w-3 mr-1" />
+          Mixed ({leave.paidDays}P/{leave.unpaidDays}U)
+        </Badge>
+      );
+    } else if (leave.paidDays > 0) {
+      return (
+        <Badge className="bg-green-100 text-green-800">
+          <DollarSign className="h-3 w-3 mr-1" />
+          Paid ({leave.paidDays} days)
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-gray-100 text-gray-800">
+          <Ban className="h-3 w-3 mr-1" />
+          Unpaid ({leave.unpaidDays} days)
+        </Badge>
+      );
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -253,19 +286,7 @@ export default function LeaveApplicationDetail({
                   {getStatusIcon(leaveApplication.status)}
                   <span>{getStatusDisplayName(leaveApplication.status)}</span>
                 </Badge>
-                <Badge className={leaveApplication.isPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                  {leaveApplication.isPaid ? (
-                    <>
-                      <DollarSign className="h-3 w-3 mr-1" />
-                      Paid
-                    </>
-                  ) : (
-                    <>
-                      <Ban className="h-3 w-3 mr-1" />
-                      Unpaid
-                    </>
-                  )}
-                </Badge>
+                {getPaidStatusBadge(leaveApplication)}
               </div>
             </div>
 
@@ -289,8 +310,12 @@ export default function LeaveApplicationDetail({
                     <span className="font-medium">{leaveApplication.totalDays} day{leaveApplication.totalDays > 1 ? 's' : ''}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Leave Type:</span>
-                    <span className="font-medium">{leaveApplication.isPaid ? 'Paid' : 'Unpaid'}</span>
+                    <span className="text-gray-600">Paid Days:</span>
+                    <span className="font-medium text-green-600">{leaveApplication.paidDays} day{leaveApplication.paidDays > 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Unpaid Days:</span>
+                    <span className="font-medium text-gray-600">{leaveApplication.unpaidDays} day{leaveApplication.unpaidDays > 1 ? 's' : ''}</span>
                   </div>
                 </div>
               </div>
@@ -313,6 +338,30 @@ export default function LeaveApplicationDetail({
                 </div>
               </div>
             </div>
+
+            <Separator />
+
+            {/* Leave Days Breakdown */}
+            {leaveApplication.leaveDays && leaveApplication.leaveDays.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="font-semibold text-gray-900">Daily Breakdown</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {leaveApplication.leaveDays.map((day, index) => (
+                    <div
+                      key={index}
+                      className={`p-2 rounded-lg border text-center ${
+                        day.isPaid ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-xs font-medium">{formatDateShort(day.date)}</div>
+                      <div className={`text-xs mt-1 ${day.isPaid ? 'text-green-700' : 'text-gray-700'}`}>
+                        {day.isPaid ? 'Paid' : 'Unpaid'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Separator />
 
@@ -409,26 +458,30 @@ export default function LeaveApplicationDetail({
             <CardContent className="space-y-3">
               <div className="text-sm space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Leave Type:</span>
-                  <Badge className={leaveApplication.isPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                    {leaveApplication.isPaid ? 'Paid' : 'Unpaid'}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Days Requested:</span>
+                  <span className="text-gray-600">Total Days:</span>
                   <span className="font-medium">{leaveApplication.totalDays}</span>
                 </div>
-                {leaveApplication.isPaid && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Paid Days:</span>
+                  <span className="font-medium text-green-600">{leaveApplication.paidDays}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Unpaid Days:</span>
+                  <span className="font-medium text-gray-600">{leaveApplication.unpaidDays}</span>
+                </div>
+                
+                {leaveApplication.paidDays > 0 && (
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-xs text-blue-700 font-medium">
-                      This will deduct {leaveApplication.totalDays} day{leaveApplication.totalDays > 1 ? 's' : ''} from paid leave balance when approved.
+                      This will deduct {leaveApplication.paidDays} day{leaveApplication.paidDays > 1 ? 's' : ''} from paid leave balance when approved.
                     </p>
                   </div>
                 )}
-                {!leaveApplication.isPaid && (
+                
+                {leaveApplication.unpaidDays > 0 && (
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-700 font-medium">
-                      This is unpaid leave and will not affect the paid leave balance.
+                      {leaveApplication.unpaidDays} day{leaveApplication.unpaidDays > 1 ? 's' : ''} will be unpaid and won't affect the paid leave balance.
                     </p>
                   </div>
                 )}

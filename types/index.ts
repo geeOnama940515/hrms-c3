@@ -73,6 +73,11 @@ export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separ
 
 export type EmploymentStatus = 'Probationary' | 'Regular' | 'Contractual' | 'ProjectBased' | 'Resigned' | 'Terminated';
 
+export interface LeaveDay {
+  date: string;
+  isPaid: boolean;
+}
+
 export interface LeaveApplication {
   id: string;
   employeeId: string;
@@ -80,7 +85,9 @@ export interface LeaveApplication {
   startDate: string;
   endDate: string;
   totalDays: number;
-  isPaid: boolean; // New field for paid/unpaid leave
+  paidDays: number; // Number of days that are paid
+  unpaidDays: number; // Number of days that are unpaid
+  leaveDays: LeaveDay[]; // Detailed breakdown of each day
   reason: string;
   status: LeaveStatus;
   appliedDate: string;
