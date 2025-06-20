@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  connectionString: "Host=ep-rough-brook-a15a4fjt-pooler.ap-southeast-1.aws.neon.tech;Database=hrms-bolt;Username=neondb_owner;Password=npg_uKp9a4Wdvegn;SSL Mode=Require;Trust Server Certificate=true",
+  connectionString: "postgres://neondb_owner:npg_uKp9a4Wdvegn@ep-rough-brook-a15a4fjt-pooler.ap-southeast-1.aws.neon.tech/hrms-bolt?sslmode=require",
   ssl: {
     rejectUnauthorized: false
   }
@@ -13,10 +13,23 @@ async function setupDatabase() {
   try {
     console.log('🚀 Setting up database schema...');
     
-    // Create Companies table
+    // Drop existing tables if they exist (to fix type issues)
     await client.query(`
-      CREATE TABLE IF NOT EXISTS companies (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      DROP TABLE IF EXISTS leave_days CASCADE;
+      DROP TABLE IF EXISTS leave_balances CASCADE;
+      DROP TABLE IF EXISTS leave_applications CASCADE;
+      DROP TABLE IF EXISTS users CASCADE;
+      DROP TABLE IF EXISTS employees CASCADE;
+      DROP TABLE IF EXISTS job_titles CASCADE;
+      DROP TABLE IF EXISTS departments CASCADE;
+      DROP TABLE IF EXISTS companies CASCADE;
+    `);
+    console.log('🧹 Cleaned up existing tables');
+    
+    // Create Companies table with TEXT id
+    await client.query(`
+      CREATE TABLE companies (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
           name VARCHAR(255) NOT NULL,
           description TEXT,
           address TEXT,
@@ -30,12 +43,12 @@ async function setupDatabase() {
 
     // Create Departments table
     await client.query(`
-      CREATE TABLE IF NOT EXISTS departments (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      CREATE TABLE departments (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
           name VARCHAR(255) NOT NULL,
           description TEXT,
-          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
-          head_id UUID,
+          company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          head_id TEXT,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -44,11 +57,11 @@ async function setupDatabase() {
 
     // Create Job Titles table
     await client.query(`
-      CREATE TABLE IF NOT EXISTS job_titles (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      CREATE TABLE job_titles (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
           title VARCHAR(255) NOT NULL,
           description TEXT,
-          department_id UUID NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
+          department_id TEXT NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -57,8 +70,8 @@ async function setupDatabase() {
 
     // Create Employees table
     await client.query(`
-      CREATE TABLE IF NOT EXISTS employees (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      CREATE TABLE employees (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
           employee_number VARCHAR(50) UNIQUE NOT NULL,
           first_name VARCHAR(100) NOT NULL,
           last_name VARCHAR(100) NOT NULL,
@@ -73,9 +86,9 @@ async function setupDatabase() {
           philhealth_number VARCHAR(50),
           pagibig_number VARCHAR(50),
           tin VARCHAR(50),
-          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
-          department_id UUID NOT NULL REFERENCES departments(id) ON DELETE RESTRICT,
-          job_title_id UUID NOT NULL REFERENCES job_titles(id) ON DELETE RESTRICT,
+          company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          department_id TEXT NOT NULL REFERENCES departments(id) ON DELETE RESTRICT,
+          job_title_id TEXT NOT NULL REFERENCES job_titles(id) ON DELETE RESTRICT,
           date_hired DATE NOT NULL,
           employment_status VARCHAR(20) NOT NULL CHECK (employment_status IN ('Probationary', 'Regular', 'Contractual', 'ProjectBased', 'Resigned', 'Terminated')),
           avatar TEXT,
@@ -85,18 +98,25 @@ async function setupDatabase() {
     `);
     console.log('✅ Created employees table');
 
+    // Add foreign key constraint for department head (after employees table exists)
+    await client.query(`
+      ALTER TABLE departments ADD CONSTRAINT fk_departments_head_id 
+          FOREIGN KEY (head_id) REFERENCES employees(id) ON DELETE SET NULL;
+    `);
+    console.log('✅ Added department head foreign key constraint');
+
     // Create Users table for authentication
     await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      CREATE TABLE users (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
           email VARCHAR(255) UNIQUE NOT NULL,
           password_hash VARCHAR(255) NOT NULL,
           first_name VARCHAR(100) NOT NULL,
           last_name VARCHAR(100) NOT NULL,
           role VARCHAR(50) NOT NULL CHECK (role IN ('HR_MANAGER', 'HR_SUPERVISOR', 'HR_COMPANY', 'DEPARTMENT_HEAD', 'EMPLOYEE')),
           department VARCHAR(255),
-          company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-          employee_id UUID REFERENCES employees(id) ON DELETE SET NULL,
+          company_id TEXT REFERENCES companies(id) ON DELETE CASCADE,
+          employee_id TEXT REFERENCES employees(id) ON DELETE SET NULL,
           avatar TEXT,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -106,9 +126,9 @@ async function setupDatabase() {
 
     // Create Leave Applications table
     await client.query(`
-      CREATE TABLE IF NOT EXISTS leave_applications (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+      CREATE TABLE leave_applications (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
           leave_type VARCHAR(50) NOT NULL CHECK (leave_type IN ('Vacation', 'Sick', 'Emergency', 'Paternity', 'Maternity', 'Bereavement', 'Personal')),
           start_date DATE NOT NULL,
           end_date DATE NOT NULL,
@@ -118,10 +138,10 @@ async function setupDatabase() {
           reason TEXT NOT NULL,
           status VARCHAR(50) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'Approved_by_Department', 'Approved', 'Rejected', 'Cancelled')),
           applied_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          department_head_approved_by UUID REFERENCES employees(id),
+          department_head_approved_by TEXT REFERENCES employees(id),
           department_head_approved_date TIMESTAMP WITH TIME ZONE,
           department_head_comments TEXT,
-          hr_acknowledged_by UUID REFERENCES employees(id),
+          hr_acknowledged_by TEXT REFERENCES employees(id),
           hr_acknowledged_date TIMESTAMP WITH TIME ZONE,
           hr_comments TEXT,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -132,9 +152,9 @@ async function setupDatabase() {
 
     // Create Leave Days table for detailed breakdown
     await client.query(`
-      CREATE TABLE IF NOT EXISTS leave_days (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          leave_application_id UUID NOT NULL REFERENCES leave_applications(id) ON DELETE CASCADE,
+      CREATE TABLE leave_days (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          leave_application_id TEXT NOT NULL REFERENCES leave_applications(id) ON DELETE CASCADE,
           date DATE NOT NULL,
           is_paid BOOLEAN NOT NULL DEFAULT true,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -144,9 +164,9 @@ async function setupDatabase() {
 
     // Create Leave Balances table
     await client.query(`
-      CREATE TABLE IF NOT EXISTS leave_balances (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+      CREATE TABLE leave_balances (
+          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
           year INTEGER NOT NULL,
           total_paid_leave INTEGER NOT NULL DEFAULT 5,
           used_paid_leave INTEGER NOT NULL DEFAULT 0,
@@ -156,21 +176,6 @@ async function setupDatabase() {
       );
     `);
     console.log('✅ Created leave_balances table');
-
-    // Add foreign key constraint for department head
-    await client.query(`
-      DO $$
-      BEGIN
-          IF NOT EXISTS (
-              SELECT 1 FROM information_schema.table_constraints 
-              WHERE constraint_name = 'fk_departments_head_id'
-          ) THEN
-              ALTER TABLE departments ADD CONSTRAINT fk_departments_head_id 
-                  FOREIGN KEY (head_id) REFERENCES employees(id) ON DELETE SET NULL;
-          END IF;
-      END $$;
-    `);
-    console.log('✅ Added department head foreign key constraint');
 
     // Create indexes for better performance
     await client.query(`
@@ -203,14 +208,6 @@ async function setupDatabase() {
 
     // Create triggers for updated_at
     await client.query(`
-      DROP TRIGGER IF EXISTS update_companies_updated_at ON companies;
-      DROP TRIGGER IF EXISTS update_departments_updated_at ON departments;
-      DROP TRIGGER IF EXISTS update_job_titles_updated_at ON job_titles;
-      DROP TRIGGER IF EXISTS update_employees_updated_at ON employees;
-      DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-      DROP TRIGGER IF EXISTS update_leave_applications_updated_at ON leave_applications;
-      DROP TRIGGER IF EXISTS update_leave_balances_updated_at ON leave_balances;
-      
       CREATE TRIGGER update_companies_updated_at BEFORE UPDATE ON companies FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
       CREATE TRIGGER update_departments_updated_at BEFORE UPDATE ON departments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
       CREATE TRIGGER update_job_titles_updated_at BEFORE UPDATE ON job_titles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
