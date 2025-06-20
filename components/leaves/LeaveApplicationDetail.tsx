@@ -32,7 +32,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { LeaveApplication } from '@/types';
-import { approveLeaveByDepartmentHead, acknowledgeLeaveByHR, rejectLeaveApplication, getLeaveTypeColor, getStatusColor, getStatusDisplayName } from '@/lib/leaves';
+import { 
+  approveLeaveByDepartmentHead, 
+  acknowledgeLeaveByHR, 
+  rejectLeaveApplication, 
+  getLeaveTypeColor, 
+  getStatusColor, 
+  getStatusDisplayName 
+} from '@/lib/client/leaves';
 import { useAuth } from '@/contexts/AuthContext';
 import { canApproveDepartmentLeave, canAcknowledgeLeave } from '@/lib/auth';
 import { toast } from 'sonner';

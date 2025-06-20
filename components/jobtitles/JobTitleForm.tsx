@@ -13,7 +13,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { JobTitle } from '@/types';
-import { createJobTitle, updateJobTitle } from '@/lib/employees';
+import { createJobTitle, updateJobTitle } from '@/lib/client/employees';
 import { toast } from 'sonner';
 
 interface JobTitleFormProps {
@@ -59,19 +59,19 @@ export default function JobTitleForm({ jobTitle, onBack, onSave }: JobTitleFormP
     try {
       let savedJobTitle: JobTitle;
       
+      const jobTitleData = {
+        ...formData,
+        description: formData.description || undefined,
+        departmentId: 'dept-1' // Default department for demo
+      };
+      
       if (jobTitle) {
         // Update existing job title
-        savedJobTitle = await updateJobTitle(jobTitle.id, {
-          ...formData,
-          description: formData.description || undefined
-        });
+        savedJobTitle = await updateJobTitle(jobTitle.id, jobTitleData);
         toast.success('Job title updated successfully');
       } else {
         // Create new job title
-        savedJobTitle = await createJobTitle({
-          ...formData,
-          description: formData.description || undefined
-        });
+        savedJobTitle = await createJobTitle(jobTitleData);
         toast.success('Job title created successfully');
       }
       

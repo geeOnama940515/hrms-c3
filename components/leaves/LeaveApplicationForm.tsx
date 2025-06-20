@@ -26,7 +26,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LeaveApplication, LeaveType, LeaveBalance, LeaveDay } from '@/types';
-import { createLeaveApplication, updateLeaveApplication, getLeaveBalance, calculateLeaveDays, getAvailablePaidLeave, generateLeaveDaysArray } from '@/lib/leaves';
+import { 
+  createLeaveApplication, 
+  updateLeaveApplication, 
+  getLeaveBalance, 
+  calculateLeaveDays, 
+  getAvailablePaidLeave, 
+  generateLeaveDaysArray 
+} from '@/lib/client/leaves';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 

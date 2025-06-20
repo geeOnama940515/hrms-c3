@@ -44,7 +44,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { LeaveApplication, LeaveStatus, LeaveType } from '@/types';
-import { getLeaveApplications, deleteLeaveApplication, getLeaveTypeColor, getStatusColor, getStatusDisplayName } from '@/lib/leaves';
+import { 
+  getLeaveApplications, 
+  deleteLeaveApplication, 
+  getLeaveTypeColor, 
+  getStatusColor, 
+  getStatusDisplayName 
+} from '@/lib/client/leaves';
 import { useAuth } from '@/contexts/AuthContext';
 import { canApplyLeave, canViewAllLeaves, canViewDepartmentLeaves, getAccessLevel } from '@/lib/auth';
 import { toast } from 'sonner';

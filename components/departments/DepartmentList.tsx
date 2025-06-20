@@ -33,7 +33,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Department } from '@/types';
-import { getDepartments, deleteDepartment, getEmployees } from '@/lib/employees';
+import { getDepartments, deleteDepartment, getEmployees } from '@/lib/client/employees';
 import { useAuth } from '@/contexts/AuthContext';
 import { canEditEmployee, canDeleteEmployee } from '@/lib/auth';
 import { toast } from 'sonner';
@@ -50,7 +50,7 @@ export default function DepartmentList({
   onDepartmentAdd 
 }: DepartmentListProps) {
   const { user } = useAuth();
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departments, setDepartments] = useState<(Department & { employeeCount: number })[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -252,9 +252,10 @@ export default function DepartmentList({
             <AlertDialogTitle>Delete Department</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{departmentToDelete?.name}"? 
-              {departmentToDelete?.employeeCount && departmentToDelete.employeeCount > 0 && (
+              {departmentToDelete && departments.find(d => d.id === departmentToDelete.id)?.employeeCount && 
+               departments.find(d => d.id === departmentToDelete.id)!.employeeCount > 0 && (
                 <span className="text-red-600 font-medium">
-                  {' '}This department has {departmentToDelete.employeeCount} employee(s) assigned to it.
+                  {' '}This department has {departments.find(d => d.id === departmentToDelete.id)!.employeeCount} employee(s) assigned to it.
                 </span>
               )}
               {' '}This action cannot be undone.

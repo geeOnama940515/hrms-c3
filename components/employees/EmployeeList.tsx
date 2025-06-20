@@ -34,7 +34,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Employee, EmploymentStatus } from '@/types';
-import { getEmployees, getDepartments } from '@/lib/employees';
+import { getEmployees, getDepartments } from '@/lib/client/employees';
 import { useAuth } from '@/contexts/AuthContext';
 import { canEditEmployee, canDeleteEmployee } from '@/lib/auth';
 
@@ -81,7 +81,7 @@ export default function EmployeeList({
       employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (employee.jobTitle && employee.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())) ||
       employee.employeeNumber.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDepartment = selectedDepartment === 'all' || employee.department === selectedDepartment;
@@ -245,8 +245,8 @@ export default function EmployeeList({
                         {getStatusBadge(employee.employmentStatus)}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                        <p className="font-medium text-gray-700">{employee.jobTitle}</p>
-                        <p className="text-gray-600">{employee.department}</p>
+                        <p className="font-medium text-gray-700">{employee.jobTitle || 'No Job Title'}</p>
+                        <p className="text-gray-600">{employee.department || 'No Department'}</p>
                         <div className="flex items-center space-x-1 text-gray-500">
                           <Mail className="h-3 w-3" />
                           <span className="truncate">{employee.email}</span>

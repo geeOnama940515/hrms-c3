@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Department, Employee } from '@/types';
-import { createDepartment, updateDepartment, getEmployees } from '@/lib/employees';
+import { createDepartment, updateDepartment, getEmployees } from '@/lib/client/employees';
 import { toast } from 'sonner';
 
 interface DepartmentFormProps {
@@ -83,21 +83,20 @@ export default function DepartmentForm({ department, onBack, onSave }: Departmen
     try {
       let savedDepartment: Department;
       
+      const departmentData = {
+        ...formData,
+        description: formData.description || undefined,
+        headId: formData.headId || undefined,
+        companyId: 'company-1' // Default company for demo
+      };
+      
       if (department) {
         // Update existing department
-        savedDepartment = await updateDepartment(department.id, {
-          ...formData,
-          description: formData.description || undefined,
-          headId: formData.headId || undefined
-        });
+        savedDepartment = await updateDepartment(department.id, departmentData);
         toast.success('Department updated successfully');
       } else {
         // Create new department
-        savedDepartment = await createDepartment({
-          ...formData,
-          description: formData.description || undefined,
-          headId: formData.headId || undefined
-        });
+        savedDepartment = await createDepartment(departmentData);
         toast.success('Department created successfully');
       }
       

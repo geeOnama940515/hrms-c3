@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { JobTitle } from '@/types';
-import { getJobTitles, deleteJobTitle, getEmployees } from '@/lib/employees';
+import { getJobTitles, deleteJobTitle, getEmployees } from '@/lib/client/employees';
 import { useAuth } from '@/contexts/AuthContext';
 import { canEditEmployee, canDeleteEmployee } from '@/lib/auth';
 import { toast } from 'sonner';

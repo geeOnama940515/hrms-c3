@@ -43,7 +43,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { Employee, Gender, CivilStatus } from '@/types';
-import { getEmployeeById, updateEmployee, getDepartments, getJobTitles } from '@/lib/employees';
+import { getEmployeeById, updateEmployee, getDepartments, getJobTitles } from '@/lib/client/employees';
 import { getRoleDisplayName } from '@/lib/auth';
 import { toast } from 'sonner';
 
