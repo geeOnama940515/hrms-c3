@@ -26,10 +26,10 @@ async function setupDatabase() {
     `);
     console.log('🧹 Cleaned up existing tables');
     
-    // Create Companies table with TEXT id
+    // Create Companies table with UUID id (consistent with Neon)
     await client.query(`
       CREATE TABLE companies (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           name VARCHAR(255) NOT NULL,
           description TEXT,
           address TEXT,
@@ -44,11 +44,11 @@ async function setupDatabase() {
     // Create Departments table
     await client.query(`
       CREATE TABLE departments (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           name VARCHAR(255) NOT NULL,
           description TEXT,
-          company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
-          head_id TEXT,
+          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          head_id UUID,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -58,10 +58,10 @@ async function setupDatabase() {
     // Create Job Titles table
     await client.query(`
       CREATE TABLE job_titles (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           title VARCHAR(255) NOT NULL,
           description TEXT,
-          department_id TEXT NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
+          department_id UUID NOT NULL REFERENCES departments(id) ON DELETE CASCADE,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
@@ -71,7 +71,7 @@ async function setupDatabase() {
     // Create Employees table
     await client.query(`
       CREATE TABLE employees (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           employee_number VARCHAR(50) UNIQUE NOT NULL,
           first_name VARCHAR(100) NOT NULL,
           last_name VARCHAR(100) NOT NULL,
@@ -86,9 +86,9 @@ async function setupDatabase() {
           philhealth_number VARCHAR(50),
           pagibig_number VARCHAR(50),
           tin VARCHAR(50),
-          company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
-          department_id TEXT NOT NULL REFERENCES departments(id) ON DELETE RESTRICT,
-          job_title_id TEXT NOT NULL REFERENCES job_titles(id) ON DELETE RESTRICT,
+          company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+          department_id UUID NOT NULL REFERENCES departments(id) ON DELETE RESTRICT,
+          job_title_id UUID NOT NULL REFERENCES job_titles(id) ON DELETE RESTRICT,
           date_hired DATE NOT NULL,
           employment_status VARCHAR(20) NOT NULL CHECK (employment_status IN ('Probationary', 'Regular', 'Contractual', 'ProjectBased', 'Resigned', 'Terminated')),
           avatar TEXT,
@@ -108,15 +108,15 @@ async function setupDatabase() {
     // Create Users table for authentication
     await client.query(`
       CREATE TABLE users (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           email VARCHAR(255) UNIQUE NOT NULL,
           password_hash VARCHAR(255) NOT NULL,
           first_name VARCHAR(100) NOT NULL,
           last_name VARCHAR(100) NOT NULL,
           role VARCHAR(50) NOT NULL CHECK (role IN ('HR_MANAGER', 'HR_SUPERVISOR', 'HR_COMPANY', 'DEPARTMENT_HEAD', 'EMPLOYEE')),
           department VARCHAR(255),
-          company_id TEXT REFERENCES companies(id) ON DELETE CASCADE,
-          employee_id TEXT REFERENCES employees(id) ON DELETE SET NULL,
+          company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+          employee_id UUID REFERENCES employees(id) ON DELETE SET NULL,
           avatar TEXT,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -127,8 +127,8 @@ async function setupDatabase() {
     // Create Leave Applications table
     await client.query(`
       CREATE TABLE leave_applications (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-          employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
           leave_type VARCHAR(50) NOT NULL CHECK (leave_type IN ('Vacation', 'Sick', 'Emergency', 'Paternity', 'Maternity', 'Bereavement', 'Personal')),
           start_date DATE NOT NULL,
           end_date DATE NOT NULL,
@@ -138,10 +138,10 @@ async function setupDatabase() {
           reason TEXT NOT NULL,
           status VARCHAR(50) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'Approved_by_Department', 'Approved', 'Rejected', 'Cancelled')),
           applied_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          department_head_approved_by TEXT REFERENCES employees(id),
+          department_head_approved_by UUID REFERENCES employees(id),
           department_head_approved_date TIMESTAMP WITH TIME ZONE,
           department_head_comments TEXT,
-          hr_acknowledged_by TEXT REFERENCES employees(id),
+          hr_acknowledged_by UUID REFERENCES employees(id),
           hr_acknowledged_date TIMESTAMP WITH TIME ZONE,
           hr_comments TEXT,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -153,8 +153,8 @@ async function setupDatabase() {
     // Create Leave Days table for detailed breakdown
     await client.query(`
       CREATE TABLE leave_days (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-          leave_application_id TEXT NOT NULL REFERENCES leave_applications(id) ON DELETE CASCADE,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          leave_application_id UUID NOT NULL REFERENCES leave_applications(id) ON DELETE CASCADE,
           date DATE NOT NULL,
           is_paid BOOLEAN NOT NULL DEFAULT true,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -165,8 +165,8 @@ async function setupDatabase() {
     // Create Leave Balances table
     await client.query(`
       CREATE TABLE leave_balances (
-          id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-          employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          employee_id UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
           year INTEGER NOT NULL,
           total_paid_leave INTEGER NOT NULL DEFAULT 5,
           used_paid_leave INTEGER NOT NULL DEFAULT 0,
