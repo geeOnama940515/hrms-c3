@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthContextType } from '@/types';
-import { authenticate } from '@/lib/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -37,13 +36,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      const authenticatedUser = await authenticate(email, password);
-      if (authenticatedUser) {
-        setUser(authenticatedUser);
-        localStorage.setItem('hrms_user', JSON.stringify(authenticatedUser));
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const { user } = await response.json();
+        setUser(user);
+        localStorage.setItem('hrms_user', JSON.stringify(user));
         return true;
+      } else {
+        return false;
       }
-      return false;
     } catch (error) {
       console.error('Login error:', error);
       return false;
