@@ -80,6 +80,7 @@ export interface LeaveApplication {
   startDate: string;
   endDate: string;
   totalDays: number;
+  isPaid: boolean; // New field for paid/unpaid leave
   reason: string;
   status: LeaveStatus;
   appliedDate: string;
@@ -113,20 +114,8 @@ export interface LeaveBalance {
   id: string;
   employeeId: string;
   year: number;
-  vacationLeave: number;
-  sickLeave: number;
-  emergencyLeave: number;
-  maternityLeave: number;
-  paternityLeave: number;
-  bereavementLeave: number;
-  personalLeave: number;
-  usedVacationLeave: number;
-  usedSickLeave: number;
-  usedEmergencyLeave: number;
-  usedMaternityLeave: number;
-  usedPaternityLeave: number;
-  usedBereavementLeave: number;
-  usedPersonalLeave: number;
+  totalPaidLeave: number; // Total paid leave allocation (e.g., 5)
+  usedPaidLeave: number; // Used paid leave count
   employee?: Employee;
 }
 

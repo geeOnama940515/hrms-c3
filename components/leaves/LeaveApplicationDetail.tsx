@@ -17,7 +17,9 @@ import {
   CheckCircle,
   XCircle,
   MessageSquare,
-  Loader2
+  Loader2,
+  DollarSign,
+  Ban
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -251,6 +253,19 @@ export default function LeaveApplicationDetail({
                   {getStatusIcon(leaveApplication.status)}
                   <span>{getStatusDisplayName(leaveApplication.status)}</span>
                 </Badge>
+                <Badge className={leaveApplication.isPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                  {leaveApplication.isPaid ? (
+                    <>
+                      <DollarSign className="h-3 w-3 mr-1" />
+                      Paid
+                    </>
+                  ) : (
+                    <>
+                      <Ban className="h-3 w-3 mr-1" />
+                      Unpaid
+                    </>
+                  )}
+                </Badge>
               </div>
             </div>
 
@@ -273,6 +288,10 @@ export default function LeaveApplicationDetail({
                     <span className="text-gray-600">Total Days:</span>
                     <span className="font-medium">{leaveApplication.totalDays} day{leaveApplication.totalDays > 1 ? 's' : ''}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Leave Type:</span>
+                    <span className="font-medium">{leaveApplication.isPaid ? 'Paid' : 'Unpaid'}</span>
+                  </div>
                 </div>
               </div>
 
@@ -284,7 +303,7 @@ export default function LeaveApplicationDetail({
                     <span className="font-medium">{formatDate(leaveApplication.appliedDate)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Leave Type:</span>
+                    <span className="text-gray-600">Leave Category:</span>
                     <span className="font-medium">{leaveApplication.leaveType}</span>
                   </div>
                   <div className="flex justify-between">
@@ -373,6 +392,44 @@ export default function LeaveApplicationDetail({
                     {leaveApplication.hrAcknowledgment.comments && (
                       <p className="italic">"{leaveApplication.hrAcknowledgment.comments}"</p>
                     )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Leave Impact */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <DollarSign className="h-5 w-5" />
+                <span>Leave Impact</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="text-sm space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Leave Type:</span>
+                  <Badge className={leaveApplication.isPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                    {leaveApplication.isPaid ? 'Paid' : 'Unpaid'}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Days Requested:</span>
+                  <span className="font-medium">{leaveApplication.totalDays}</span>
+                </div>
+                {leaveApplication.isPaid && (
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-700 font-medium">
+                      This will deduct {leaveApplication.totalDays} day{leaveApplication.totalDays > 1 ? 's' : ''} from paid leave balance when approved.
+                    </p>
+                  </div>
+                )}
+                {!leaveApplication.isPaid && (
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-700 font-medium">
+                      This is unpaid leave and will not affect the paid leave balance.
+                    </p>
                   </div>
                 )}
               </div>

@@ -1,49 +1,67 @@
 import { LeaveApplication, LeaveBalance, LeaveType, LeaveStatus, Employee } from '@/types';
 import { mockEmployees, getEmployeeDisplayData } from './employees';
 
-// Mock leave balances
+// Mock leave balances - simplified to track only paid leave
 export const mockLeaveBalances: LeaveBalance[] = [
   {
     id: '1',
     employeeId: '1',
     year: 2024,
-    vacationLeave: 15,
-    sickLeave: 10,
-    emergencyLeave: 3,
-    maternityLeave: 0,
-    paternityLeave: 7,
-    bereavementLeave: 3,
-    personalLeave: 5,
-    usedVacationLeave: 5,
-    usedSickLeave: 2,
-    usedEmergencyLeave: 0,
-    usedMaternityLeave: 0,
-    usedPaternityLeave: 0,
-    usedBereavementLeave: 0,
-    usedPersonalLeave: 1
+    totalPaidLeave: 5,
+    usedPaidLeave: 2
   },
   {
     id: '2',
     employeeId: '2',
     year: 2024,
-    vacationLeave: 15,
-    sickLeave: 10,
-    emergencyLeave: 3,
-    maternityLeave: 60,
-    paternityLeave: 0,
-    bereavementLeave: 3,
-    personalLeave: 5,
-    usedVacationLeave: 3,
-    usedSickLeave: 1,
-    usedEmergencyLeave: 0,
-    usedMaternityLeave: 0,
-    usedPaternityLeave: 0,
-    usedBereavementLeave: 0,
-    usedPersonalLeave: 0
+    totalPaidLeave: 5,
+    usedPaidLeave: 1
+  },
+  {
+    id: '3',
+    employeeId: '3',
+    year: 2024,
+    totalPaidLeave: 5,
+    usedPaidLeave: 0
+  },
+  {
+    id: '4',
+    employeeId: '4',
+    year: 2024,
+    totalPaidLeave: 5,
+    usedPaidLeave: 1
+  },
+  {
+    id: '5',
+    employeeId: '5',
+    year: 2024,
+    totalPaidLeave: 5,
+    usedPaidLeave: 3
+  },
+  {
+    id: '6',
+    employeeId: '6',
+    year: 2024,
+    totalPaidLeave: 5,
+    usedPaidLeave: 0
+  },
+  {
+    id: '7',
+    employeeId: '7',
+    year: 2024,
+    totalPaidLeave: 5,
+    usedPaidLeave: 2
+  },
+  {
+    id: '8',
+    employeeId: '8',
+    year: 2024,
+    totalPaidLeave: 5,
+    usedPaidLeave: 1
   }
 ];
 
-// Mock leave applications
+// Mock leave applications - updated with isPaid field
 export const mockLeaveApplications: LeaveApplication[] = [
   {
     id: '1',
@@ -52,6 +70,7 @@ export const mockLeaveApplications: LeaveApplication[] = [
     startDate: '2024-02-15',
     endDate: '2024-02-19',
     totalDays: 5,
+    isPaid: true,
     reason: 'Family vacation to Boracay',
     status: 'Approved',
     appliedDate: '2024-02-01T08:00:00Z',
@@ -75,6 +94,7 @@ export const mockLeaveApplications: LeaveApplication[] = [
     startDate: '2024-01-25',
     endDate: '2024-01-26',
     totalDays: 2,
+    isPaid: true,
     reason: 'Flu symptoms and fever',
     status: 'Approved_by_Department',
     appliedDate: '2024-01-24T09:00:00Z',
@@ -93,6 +113,7 @@ export const mockLeaveApplications: LeaveApplication[] = [
     startDate: '2024-03-01',
     endDate: '2024-03-01',
     totalDays: 1,
+    isPaid: false,
     reason: 'Personal matters to attend to',
     status: 'Pending',
     appliedDate: '2024-02-20T10:00:00Z',
@@ -250,6 +271,12 @@ export const acknowledgeLeaveByHR = async (
   };
   
   mockLeaveApplications[index] = updatedApplication;
+  
+  // Update leave balance if it's a paid leave
+  if (updatedApplication.isPaid) {
+    await updateLeaveBalance(updatedApplication.employeeId, updatedApplication.totalDays);
+  }
+  
   return getLeaveApplicationDisplayData(updatedApplication);
 };
 
@@ -293,7 +320,6 @@ export const getLeaveBalance = async (employeeId: string, year: number = new Dat
 
 export const updateLeaveBalance = async (
   employeeId: string,
-  leaveType: LeaveType,
   daysUsed: number,
   year: number = new Date().getFullYear()
 ): Promise<LeaveBalance> => {
@@ -307,48 +333,14 @@ export const updateLeaveBalance = async (
       id: Date.now().toString(),
       employeeId,
       year,
-      vacationLeave: 15,
-      sickLeave: 10,
-      emergencyLeave: 3,
-      maternityLeave: 60,
-      paternityLeave: 7,
-      bereavementLeave: 3,
-      personalLeave: 5,
-      usedVacationLeave: 0,
-      usedSickLeave: 0,
-      usedEmergencyLeave: 0,
-      usedMaternityLeave: 0,
-      usedPaternityLeave: 0,
-      usedBereavementLeave: 0,
-      usedPersonalLeave: 0
+      totalPaidLeave: 5,
+      usedPaidLeave: 0
     };
     mockLeaveBalances.push(balance);
   }
   
-  // Update used leave based on type
-  switch (leaveType) {
-    case 'Vacation':
-      balance.usedVacationLeave += daysUsed;
-      break;
-    case 'Sick':
-      balance.usedSickLeave += daysUsed;
-      break;
-    case 'Emergency':
-      balance.usedEmergencyLeave += daysUsed;
-      break;
-    case 'Maternity':
-      balance.usedMaternityLeave += daysUsed;
-      break;
-    case 'Paternity':
-      balance.usedPaternityLeave += daysUsed;
-      break;
-    case 'Bereavement':
-      balance.usedBereavementLeave += daysUsed;
-      break;
-    case 'Personal':
-      balance.usedPersonalLeave += daysUsed;
-      break;
-  }
+  // Update used paid leave
+  balance.usedPaidLeave += daysUsed;
   
   return balance;
 };
@@ -362,25 +354,8 @@ export const calculateLeaveDays = (startDate: string, endDate: string): number =
   return diffDays;
 };
 
-export const getAvailableLeave = (balance: LeaveBalance, leaveType: LeaveType): number => {
-  switch (leaveType) {
-    case 'Vacation':
-      return balance.vacationLeave - balance.usedVacationLeave;
-    case 'Sick':
-      return balance.sickLeave - balance.usedSickLeave;
-    case 'Emergency':
-      return balance.emergencyLeave - balance.usedEmergencyLeave;
-    case 'Maternity':
-      return balance.maternityLeave - balance.usedMaternityLeave;
-    case 'Paternity':
-      return balance.paternityLeave - balance.usedPaternityLeave;
-    case 'Bereavement':
-      return balance.bereavementLeave - balance.usedBereavementLeave;
-    case 'Personal':
-      return balance.personalLeave - balance.usedPersonalLeave;
-    default:
-      return 0;
-  }
+export const getAvailablePaidLeave = (balance: LeaveBalance): number => {
+  return balance.totalPaidLeave - balance.usedPaidLeave;
 };
 
 export const getLeaveTypeColor = (leaveType: LeaveType): string => {

@@ -21,8 +21,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Switch } from '@/components/ui/switch';
 import { LeaveApplication, LeaveType, LeaveBalance } from '@/types';
-import { createLeaveApplication, updateLeaveApplication, getLeaveBalance, calculateLeaveDays, getAvailableLeave } from '@/lib/leaves';
+import { createLeaveApplication, updateLeaveApplication, getLeaveBalance, calculateLeaveDays, getAvailablePaidLeave } from '@/lib/leaves';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -38,14 +39,15 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
     leaveType: '' as LeaveType | '',
     startDate: '',
     endDate: '',
-    reason: ''
+    reason: '',
+    isPaid: true
   });
   const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [totalDays, setTotalDays] = useState(0);
-  const [availableDays, setAvailableDays] = useState(0);
+  const [availablePaidLeave, setAvailablePaidLeave] = useState(0);
 
   useEffect(() => {
     if (leaveApplication) {
@@ -53,7 +55,8 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
         leaveType: leaveApplication.leaveType,
         startDate: leaveApplication.startDate,
         endDate: leaveApplication.endDate,
-        reason: leaveApplication.reason
+        reason: leaveApplication.reason,
+        isPaid: leaveApplication.isPaid
       });
     }
     loadLeaveBalance();
@@ -69,13 +72,13 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
   }, [formData.startDate, formData.endDate]);
 
   useEffect(() => {
-    if (leaveBalance && formData.leaveType) {
-      const available = getAvailableLeave(leaveBalance, formData.leaveType);
-      setAvailableDays(available);
+    if (leaveBalance) {
+      const available = getAvailablePaidLeave(leaveBalance);
+      setAvailablePaidLeave(available);
     } else {
-      setAvailableDays(0);
+      setAvailablePaidLeave(0);
     }
-  }, [leaveBalance, formData.leaveType]);
+  }, [leaveBalance]);
 
   const loadLeaveBalance = async () => {
     if (!user) return;
@@ -115,9 +118,9 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
       }
     }
 
-    // Leave balance validation
-    if (formData.leaveType && totalDays > 0 && availableDays < totalDays) {
-      newErrors.leaveType = `Insufficient leave balance. Available: ${availableDays} days, Requested: ${totalDays} days`;
+    // Paid leave balance validation (only if it's a paid leave)
+    if (formData.isPaid && totalDays > 0 && availablePaidLeave < totalDays) {
+      newErrors.isPaid = `Insufficient paid leave balance. Available: ${availablePaidLeave} days, Requested: ${totalDays} days`;
     }
 
     setErrors(newErrors);
@@ -162,26 +165,23 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  const getLeaveTypeOptions = (): { value: LeaveType; label: string; available: number }[] => {
-    // Default leave types with fallback values if no balance is loaded
-    const defaultOptions = [
-      { value: 'Vacation' as LeaveType, label: 'Vacation Leave', available: leaveBalance ? getAvailableLeave(leaveBalance, 'Vacation') : 15 },
-      { value: 'Sick' as LeaveType, label: 'Sick Leave', available: leaveBalance ? getAvailableLeave(leaveBalance, 'Sick') : 10 },
-      { value: 'Emergency' as LeaveType, label: 'Emergency Leave', available: leaveBalance ? getAvailableLeave(leaveBalance, 'Emergency') : 3 },
-      { value: 'Personal' as LeaveType, label: 'Personal Leave', available: leaveBalance ? getAvailableLeave(leaveBalance, 'Personal') : 5 },
-      { value: 'Maternity' as LeaveType, label: 'Maternity Leave', available: leaveBalance ? getAvailableLeave(leaveBalance, 'Maternity') : 60 },
-      { value: 'Paternity' as LeaveType, label: 'Paternity Leave', available: leaveBalance ? getAvailableLeave(leaveBalance, 'Paternity') : 7 },
-      { value: 'Bereavement' as LeaveType, label: 'Bereavement Leave', available: leaveBalance ? getAvailableLeave(leaveBalance, 'Bereavement') : 3 }
+  const getLeaveTypeOptions = (): { value: LeaveType; label: string }[] => {
+    return [
+      { value: 'Vacation', label: 'Vacation Leave' },
+      { value: 'Sick', label: 'Sick Leave' },
+      { value: 'Emergency', label: 'Emergency Leave' },
+      { value: 'Personal', label: 'Personal Leave' },
+      { value: 'Maternity', label: 'Maternity Leave' },
+      { value: 'Paternity', label: 'Paternity Leave' },
+      { value: 'Bereavement', label: 'Bereavement Leave' }
     ];
-
-    return defaultOptions;
   };
 
   if (loadingBalance) {
@@ -232,17 +232,8 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
                   </SelectTrigger>
                   <SelectContent>
                     {getLeaveTypeOptions().map(option => (
-                      <SelectItem 
-                        key={option.value} 
-                        value={option.value}
-                        disabled={option.available <= 0}
-                      >
-                        <div className="flex justify-between items-center w-full">
-                          <span>{option.label}</span>
-                          <span className="text-sm text-gray-500 ml-2">
-                            ({option.available} days available)
-                          </span>
-                        </div>
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -284,6 +275,26 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
                 </div>
               </div>
 
+              {/* Paid/Unpaid Toggle */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="isPaid">Paid Leave</Label>
+                    <p className="text-sm text-gray-500">
+                      Toggle to request paid or unpaid leave
+                    </p>
+                  </div>
+                  <Switch
+                    id="isPaid"
+                    checked={formData.isPaid}
+                    onCheckedChange={(checked) => handleInputChange('isPaid', checked)}
+                  />
+                </div>
+                {errors.isPaid && (
+                  <p className="text-sm text-red-600">{errors.isPaid}</p>
+                )}
+              </div>
+
               {/* Leave Summary */}
               {totalDays > 0 && (
                 <Alert>
@@ -291,15 +302,46 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
                   <AlertDescription>
                     <div className="space-y-1">
                       <p><strong>Total Days Requested:</strong> {totalDays} day{totalDays > 1 ? 's' : ''}</p>
-                      {formData.leaveType && (
-                        <p><strong>Available Balance:</strong> {availableDays} day{availableDays > 1 ? 's' : ''}</p>
+                      <p><strong>Leave Type:</strong> {formData.isPaid ? 'Paid' : 'Unpaid'}</p>
+                      {formData.isPaid && leaveBalance && (
+                        <>
+                          <p><strong>Available Paid Leave:</strong> {availablePaidLeave} day{availablePaidLeave > 1 ? 's' : ''}</p>
+                          {totalDays > availablePaidLeave && (
+                            <p className="text-red-600"><strong>Warning:</strong> Insufficient paid leave balance!</p>
+                          )}
+                        </>
                       )}
-                      {formData.leaveType && totalDays > availableDays && (
-                        <p className="text-red-600"><strong>Warning:</strong> Insufficient leave balance!</p>
+                      {!formData.isPaid && (
+                        <p className="text-blue-600"><strong>Note:</strong> This will be unpaid leave and won't affect your paid leave balance.</p>
                       )}
                     </div>
                   </AlertDescription>
                 </Alert>
+              )}
+
+              {/* Current Balance Display */}
+              {leaveBalance && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">Your Leave Balance</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-blue-700">Total Paid Leave:</span>
+                      <p className="font-medium text-blue-900">{leaveBalance.totalPaidLeave} days</p>
+                    </div>
+                    <div>
+                      <span className="text-blue-700">Used Paid Leave:</span>
+                      <p className="font-medium text-blue-900">{leaveBalance.usedPaidLeave} days</p>
+                    </div>
+                    <div>
+                      <span className="text-blue-700">Available Paid Leave:</span>
+                      <p className="font-medium text-blue-900">{availablePaidLeave} days</p>
+                    </div>
+                    <div>
+                      <span className="text-blue-700">Unpaid Leave:</span>
+                      <p className="font-medium text-blue-900">Unlimited</p>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Reason */}
@@ -325,7 +367,7 @@ export default function LeaveApplicationForm({ leaveApplication, onBack, onSave 
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={loading || (totalDays > 0 && availableDays < totalDays)} 
+                  disabled={loading || (formData.isPaid && totalDays > 0 && availablePaidLeave < totalDays)} 
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   {loading ? (

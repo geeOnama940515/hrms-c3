@@ -16,7 +16,9 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Filter
+  Filter,
+  DollarSign,
+  Ban
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -64,6 +66,7 @@ export default function LeaveApplicationList({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [paidFilter, setPaidFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [leaveToDelete, setLeaveToDelete] = useState<LeaveApplication | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -108,8 +111,11 @@ export default function LeaveApplicationList({
 
     const matchesStatus = statusFilter === 'all' || leave.status === statusFilter;
     const matchesType = typeFilter === 'all' || leave.leaveType === typeFilter;
+    const matchesPaid = paidFilter === 'all' || 
+      (paidFilter === 'paid' && leave.isPaid) || 
+      (paidFilter === 'unpaid' && !leave.isPaid);
 
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesSearch && matchesStatus && matchesType && matchesPaid;
   });
 
   const handleDeleteClick = (leave: LeaveApplication) => {
@@ -245,6 +251,16 @@ export default function LeaveApplicationList({
                 <SelectItem value="Bereavement">Bereavement</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={paidFilter} onValueChange={setPaidFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="All Leave Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Leave Types</SelectItem>
+                <SelectItem value="paid">Paid Leave</SelectItem>
+                <SelectItem value="unpaid">Unpaid Leave</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -267,7 +283,7 @@ export default function LeaveApplicationList({
               <Calendar className="h-12 w-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No leave applications found</h3>
               <p className="text-gray-500 text-center">
-                {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
+                {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' || paidFilter !== 'all'
                   ? 'Try adjusting your search criteria'
                   : 'Get started by applying for your first leave'
                 }
@@ -291,6 +307,19 @@ export default function LeaveApplicationList({
                         <Badge className={`${getStatusColor(leave.status)} flex items-center space-x-1`}>
                           {getStatusIcon(leave.status)}
                           <span>{getStatusDisplayName(leave.status)}</span>
+                        </Badge>
+                        <Badge className={leave.isPaid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {leave.isPaid ? (
+                            <>
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              Paid
+                            </>
+                          ) : (
+                            <>
+                              <Ban className="h-3 w-3 mr-1" />
+                              Unpaid
+                            </>
+                          )}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
