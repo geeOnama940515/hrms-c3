@@ -1,73 +1,45 @@
+import { query } from './db';
 import { User, UserRole } from '@/types';
 
-// Mock users for demonstration with updated HR roles
-const mockUsers: (User & { password: string })[] = [
-  {
-    id: '1',
-    email: 'hr.manager@company.com',
-    password: 'password123',
-    firstName: 'Maria',
-    lastName: 'Santos',
-    role: 'HR_MANAGER',
-    companyId: 'company-1',
-    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-  },
-  {
-    id: '2',
-    email: 'hr.supervisor@company.com',
-    password: 'password123',
-    firstName: 'Jose',
-    lastName: 'Dela Cruz',
-    role: 'HR_SUPERVISOR',
-    department: 'HR',
-    companyId: 'company-1',
-    avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-  },
-  {
-    id: '3',
-    email: 'hr.company@company.com',
-    password: 'password123',
-    firstName: 'Carmen',
-    lastName: 'Rodriguez',
-    role: 'HR_COMPANY',
-    department: 'HR',
-    companyId: 'company-1',
-    avatar: 'https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-  },
-  {
-    id: '4',
-    email: 'dept.head@company.com',
-    password: 'password123',
-    firstName: 'Ana',
-    lastName: 'Reyes',
-    role: 'DEPARTMENT_HEAD',
-    department: 'Engineering',
-    companyId: 'company-1',
-    avatar: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-  },
-  {
-    id: '5',
-    email: 'employee@company.com',
-    password: 'password123',
-    firstName: 'Juan',
-    lastName: 'Mendoza',
-    role: 'EMPLOYEE',
-    department: 'Engineering',
-    companyId: 'company-1',
-    avatar: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop'
-  }
-];
+// Helper function to convert database row to User object
+const mapRowToUser = (row: any): User => ({
+  id: row.id,
+  email: row.email,
+  firstName: row.first_name,
+  lastName: row.last_name,
+  role: row.role as UserRole,
+  department: row.department,
+  companyId: row.company_id,
+  avatar: row.avatar
+});
 
 export const authenticate = async (email: string, password: string): Promise<User | null> => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   
-  const user = mockUsers.find(u => u.email === email && u.password === password);
-  if (user) {
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+  try {
+    const result = await query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+    
+    if (result.rows.length === 0) {
+      return null;
+    }
+    
+    const user = result.rows[0];
+    
+    // For demo purposes, we'll accept any password that equals "password123"
+    // In production, you would hash the password and compare with stored hash
+    if (password === 'password123') {
+      return mapRowToUser(user);
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return null;
   }
-  return null;
 };
 
 export const getRoleDisplayName = (role: UserRole): string => {
