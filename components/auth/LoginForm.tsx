@@ -20,14 +20,22 @@ export default function LoginForm() {
     e.preventDefault();
     setError('');
 
+    console.log('🔐 Login attempt started:', { email, passwordLength: password.length });
+
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
     }
 
+    console.log('📤 Calling login function...');
     const success = await login(email, password);
+    console.log('📥 Login function returned:', success);
+    
     if (!success) {
+      console.log('❌ Login failed - invalid credentials');
       setError('Invalid email or password');
+    } else {
+      console.log('✅ Login successful - should redirect to dashboard');
     }
   };
 
@@ -40,6 +48,7 @@ export default function LoginForm() {
   ];
 
   const loginWithDemo = (demoEmail: string) => {
+    console.log('🎯 Demo login selected:', demoEmail);
     setEmail(demoEmail);
     setPassword('password123');
   };

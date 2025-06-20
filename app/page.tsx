@@ -33,6 +33,12 @@ function Dashboard() {
   const [selectedLeave, setSelectedLeave] = useState<LeaveApplication | null>(null);
   const [isEditingLeave, setIsEditingLeave] = useState(false);
 
+  console.log('🏠 Dashboard: Render called with:', { 
+    user: user?.email || 'none', 
+    isLoading, 
+    activeTab 
+  });
+
   const handleEmployeeSelect = (employee: Employee) => {
     setSelectedEmployee(employee);
     setIsEditingEmployee(false);
@@ -138,6 +144,7 @@ function Dashboard() {
   };
 
   if (isLoading) {
+    console.log('⏳ Dashboard: Showing loading screen');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -149,8 +156,11 @@ function Dashboard() {
   }
 
   if (!user) {
+    console.log('🔐 Dashboard: No user, showing login form');
     return <LoginForm />;
   }
+
+  console.log('✅ Dashboard: User authenticated, showing dashboard');
 
   const renderContent = () => {
     if (activeTab === 'employees') {
@@ -382,6 +392,7 @@ function Dashboard() {
 }
 
 export default function Home() {
+  console.log('🏠 Home: Component rendered');
   return (
     <AuthProvider>
       <Dashboard />
