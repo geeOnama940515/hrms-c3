@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Employee, EmploymentStatus, Gender, CivilStatus } from '@/types';
-import { createEmployee, updateEmployee, getDepartments, getJobTitles } from '@/lib/employees';
+import { createEmployee, updateEmployee, getDepartments, getJobTitles } from '@/lib/client/employees';
 import { toast } from 'sonner';
 
 interface EmployeeFormProps {
@@ -87,8 +87,8 @@ export default function EmployeeForm({ employee, onBack, onSave }: EmployeeFormP
         tin: employee.tin || '',
         employeeNumber: employee.employeeNumber,
         dateHired: employee.dateHired,
-        jobTitle: employee.jobTitle,
-        department: employee.department,
+        jobTitle: employee.jobTitle || '',
+        department: employee.department || '',
         employmentStatus: employee.employmentStatus
       });
     }
@@ -172,7 +172,11 @@ export default function EmployeeForm({ employee, onBack, onSave }: EmployeeFormP
         sssNumber: formData.sssNumber || undefined,
         philHealthNumber: formData.philHealthNumber || undefined,
         pagIbigNumber: formData.pagIbigNumber || undefined,
-        tin: formData.tin || undefined
+        tin: formData.tin || undefined,
+        // Add required fields for API
+        companyId: 'company-1', // Default company for demo
+        departmentId: 'dept-1', // Will be mapped from department name
+        jobTitleId: 'job-1' // Will be mapped from job title
       };
       
       if (employee) {

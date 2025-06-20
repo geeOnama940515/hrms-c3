@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Cake, Gift, Calendar, Users, ChevronRight } from 'lucide-react';
 import { Employee } from '@/types';
-import { getEmployees } from '@/lib/employees';
+import { getEmployees } from '@/lib/client/employees';
 
 interface UpcomingBirthday {
   employee: Employee;
