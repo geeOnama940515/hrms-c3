@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  hrms:
+    build: 
+      context: .
+      args:
+        NEXT_PUBLIC_APP_BRAND_PREFIX: ${NEXT_PUBLIC_APP_BRAND_PREFIX:-VMIS}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    container_name: ${CONTAINER_NAME:-vmis-hrms}
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NEXT_PUBLIC_APP_BRAND_PREFIX=${NEXT_PUBLIC_APP_BRAND_PREFIX:-VMIS}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    restart: unless-stopped
+    networks:
+      - hrms-network
+    labels:
+      # Traefik labels for automatic reverse proxy
+      - "traefik.enable=true"
+      - "traefik.http.routers.${CONTAINER_NAME:-vmis-hrms}.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.services.${CONTAINER_NAME:-vmis-hrms}.loadbalancer.server.port=3000"
+      # Portainer labels for management
+      - "io.portainer.accesscontrol.teams=administrators"
+      - "com.docker.compose.project=${CONTAINER_NAME:-vmis-hrms}"
+      # Custom labels for SaaS management
+      - "hrms.client=${NEXT_PUBLIC_APP_BRAND_PREFIX:-VMIS}"
+      - "hrms.type=saas-instance"
+      - "hrms.version=1.0"
+
+networks:
+  hrms-network:
+    driver: bridge
+    labels:
+      - "hrms.network=true"
+
+# Health check and monitoring
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s

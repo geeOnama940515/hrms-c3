@@ -1,0 +1,50 @@
+{
+  "version": "2",
+  "templates": [
+    {
+      "type": 3,
+      "title": "VMIS-HRMS SaaS Template",
+      "description": "Dynamic HRMS system with vendor management - perfect for SaaS deployment",
+      "note": "This template creates a branded HRMS instance for a specific client. Each deployment gets its own container with custom branding.",
+      "categories": ["SaaS", "HRMS", "Business"],
+      "platform": "linux",
+      "logo": "https://raw.githubusercontent.com/portainer/portainer/develop/app/assets/ico/favicon.ico",
+      "repository": {
+        "url": "https://github.com/your-repo/hrms-template",
+        "stackfile": "docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "NEXT_PUBLIC_APP_BRAND_PREFIX",
+          "label": "Company Brand Prefix",
+          "description": "Company name/code that will appear in the UI (e.g., VDC, ABC, XYZ)",
+          "default": "VMIS"
+        },
+        {
+          "name": "NEXT_PUBLIC_API_URL",
+          "label": "API URL",
+          "description": "Full URL where the application will be accessible",
+          "default": "http://localhost:3000"
+        },
+        {
+          "name": "CONTAINER_NAME",
+          "label": "Container Name",
+          "description": "Unique name for this container instance",
+          "default": "vmis-hrms"
+        },
+        {
+          "name": "DOMAIN",
+          "label": "Domain Name",
+          "description": "Domain where the application will be accessible",
+          "default": "localhost"
+        },
+        {
+          "name": "PORT",
+          "label": "External Port",
+          "description": "Port to expose the application on",
+          "default": "3000"
+        }
+      ]
+    }
+  ]
+}
