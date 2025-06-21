@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Building2, Users } from 'lucide-react';
+import { Loader2, Building2, Users, Package } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginForm() {
@@ -45,16 +45,26 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-            <div className="bg-blue-600 p-3 rounded-full">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full">
               <Building2 className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">HRMS Philippines</h1>
-          <p className="text-gray-600">Employee Management System</p>
+          <h1 className="text-3xl font-bold text-gray-900">VMIS-HRMS</h1>
+          <p className="text-gray-600">Vendor Management & HR System</p>
+          <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center space-x-1">
+              <Package className="h-4 w-4" />
+              <span>Vendor Management</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Users className="h-4 w-4" />
+              <span>HR Management</span>
+            </div>
+          </div>
         </div>
 
         <Card className="shadow-lg border-0">
@@ -99,7 +109,7 @@ export default function LoginForm() {
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-blue-600 hover:bg-blue-700"
+                className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -148,8 +158,8 @@ export default function LoginForm() {
         </Card>
 
         <div className="text-center text-sm text-gray-500">
-          <p>© 2024 HRMS Philippines. All rights reserved.</p>
-          <p className="mt-1">Built for Philippine companies and employees</p>
+          <p>© 2024 VMIS-HRMS. All rights reserved.</p>
+          <p className="mt-1">SaaS Platform for Vendor Management & HR</p>
         </div>
       </div>
     </div>

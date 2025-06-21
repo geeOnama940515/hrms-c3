@@ -19,7 +19,7 @@ import LeaveApplicationForm from '@/components/leaves/LeaveApplicationForm';
 import LeaveApplicationDetail from '@/components/leaves/LeaveApplicationDetail';
 import MyProfile from '@/components/profile/MyProfile';
 import { Employee, Department, JobTitle, LeaveApplication } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Package, Building2, Users, BarChart3 } from 'lucide-react';
 
 function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -142,7 +142,7 @@ function Dashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading HRMS...</p>
+          <p className="text-gray-600">Loading VMIS-HRMS...</p>
         </div>
       </div>
     );
@@ -226,7 +226,6 @@ function Dashboard() {
       }
       
       if (selectedDepartment && !isEditingDepartment) {
-        // TODO: Implement DepartmentProfile component
         return (
           <div className="text-center py-12">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Department Details</h3>
@@ -256,7 +255,6 @@ function Dashboard() {
       }
       
       if (selectedJobTitle && !isEditingJobTitle) {
-        // TODO: Implement JobTitleProfile component
         return (
           <div className="text-center py-12">
             <h3 className="text-lg font-medium text-gray-900 mb-2">Job Title Details</h3>
@@ -274,6 +272,17 @@ function Dashboard() {
       );
     }
 
+    if (activeTab === 'vendors') {
+      return (
+        <div className="text-center py-12">
+          <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Vendor Management</h3>
+          <p className="text-gray-500">Vendor management system will be implemented in the next update.</p>
+          <p className="text-sm text-gray-400 mt-2">Manage suppliers, contracts, and vendor relationships</p>
+        </div>
+      );
+    }
+
     if (activeTab === 'my-profile') {
       return <MyProfile />;
     }
@@ -281,8 +290,10 @@ function Dashboard() {
     if (activeTab === 'reports') {
       return (
         <div className="text-center py-12">
+          <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Reports & Analytics</h3>
-          <p className="text-gray-500">Reports and analytics will be implemented in the next update.</p>
+          <p className="text-gray-500">Advanced reporting and analytics dashboard will be implemented in the next update.</p>
+          <p className="text-sm text-gray-400 mt-2">Employee reports, leave analytics, vendor performance metrics</p>
         </div>
       );
     }
@@ -290,8 +301,10 @@ function Dashboard() {
     if (activeTab === 'settings') {
       return (
         <div className="text-center py-12">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Settings</h3>
-          <p className="text-gray-500">Settings panel will be implemented in the next update.</p>
+          <Building2 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">System Settings</h3>
+          <p className="text-gray-500">System configuration and settings panel will be implemented in the next update.</p>
+          <p className="text-sm text-gray-400 mt-2">Company settings, user management, system preferences</p>
         </div>
       );
     }
@@ -304,7 +317,7 @@ function Dashboard() {
             Welcome back, {user.firstName}!
           </h2>
           <p className="text-gray-600 mt-1">
-            Here's what's happening with your team today.
+            Here's what's happening with your organization today.
           </p>
         </div>
         
@@ -313,11 +326,10 @@ function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <RecentActivity />
           <div className="space-y-6">
-            {/* Upcoming Birthdays */}
             <UpcomingBirthdays />
             
             {/* Quick Actions */}
-            <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border">
               <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
               <div className="space-y-2">
                 <button 
@@ -348,14 +360,14 @@ function Dashboard() {
                   → Manage Departments
                 </button>
                 <button 
-                  onClick={() => setActiveTab('job-titles')}
-                  className="w-full text-left px-3 py-2 text-sm text-pink-700 hover:bg-pink-100 rounded transition-colors"
+                  onClick={() => setActiveTab('vendors')}
+                  className="w-full text-left px-3 py-2 text-sm text-orange-700 hover:bg-orange-100 rounded transition-colors"
                 >
-                  → Manage Job Titles
+                  → Manage Vendors
                 </button>
                 <button 
                   onClick={() => setActiveTab('reports')}
-                  className="w-full text-left px-3 py-2 text-sm text-orange-700 hover:bg-orange-100 rounded transition-colors"
+                  className="w-full text-left px-3 py-2 text-sm text-pink-700 hover:bg-pink-100 rounded transition-colors"
                 >
                   → Generate Reports
                 </button>

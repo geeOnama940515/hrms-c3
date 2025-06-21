@@ -16,7 +16,8 @@ import {
   UserPlus,
   BarChart3,
   Briefcase,
-  CalendarDays
+  CalendarDays,
+  Package
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRoleDisplayName, canAccessEmployeeManagement, canManageDepartments, canManageJobTitles } from '@/lib/auth';
@@ -63,6 +64,12 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       available: canManageJobTitles(user.role)
     },
     {
+      id: 'vendors',
+      label: 'Vendors',
+      icon: Package,
+      available: user.role === 'HR_MANAGER' || user.role === 'HR_SUPERVISOR'
+    },
+    {
       id: 'my-profile',
       label: 'My Profile',
       icon: User,
@@ -85,12 +92,12 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="bg-blue-600 p-2 rounded-lg">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
             <Building2 className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="font-bold text-gray-900">HRMS</h2>
-            <p className="text-sm text-gray-500">Philippines</p>
+            <h2 className="font-bold text-gray-900">VMIS-HRMS</h2>
+            <p className="text-sm text-gray-500">SaaS Platform</p>
           </div>
         </div>
       </div>
@@ -131,7 +138,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               className={cn(
                 'w-full justify-start h-11',
                 activeTab === item.id
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
                   : 'text-gray-700 hover:bg-gray-100'
               )}
               onClick={() => onTabChange(item.id)}
