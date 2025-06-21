@@ -22,6 +22,9 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { getRoleDisplayName, canAccessEmployeeManagement, canManageDepartments, canManageJobTitles } from '@/lib/auth';
 
+// Get the brand prefix from environment variable, default to 'VMIS'
+const brandPrefix = process.env.NEXT_PUBLIC_APP_BRAND_PREFIX || 'VMIS';
+
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -96,7 +99,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             <Building2 className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="font-bold text-gray-900">VMIS-HRMS</h2>
+            <h2 className="font-bold text-gray-900">{brandPrefix}-HRMS</h2>
             <p className="text-sm text-gray-500">SaaS Platform</p>
           </div>
         </div>

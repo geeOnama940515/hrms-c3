@@ -21,6 +21,9 @@ import MyProfile from '@/components/profile/MyProfile';
 import { Employee, Department, JobTitle, LeaveApplication } from '@/types';
 import { Loader2, Package, Building2, Users, BarChart3 } from 'lucide-react';
 
+// Get the brand prefix from environment variable, default to 'VMIS'
+const brandPrefix = process.env.NEXT_PUBLIC_APP_BRAND_PREFIX || 'VMIS';
+
 function Dashboard() {
   const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -142,7 +145,7 @@ function Dashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading VMIS-HRMS...</p>
+          <p className="text-gray-600">Loading {brandPrefix}-HRMS...</p>
         </div>
       </div>
     );

@@ -9,6 +9,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Building2, Users, Package } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Get the brand prefix from environment variable, default to 'VMIS'
+const brandPrefix = process.env.NEXT_PUBLIC_APP_BRAND_PREFIX || 'VMIS';
+
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,7 +56,7 @@ export default function LoginForm() {
               <Building2 className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">VMIS-HRMS</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{brandPrefix}-HRMS</h1>
           <p className="text-gray-600">Vendor Management & HR System</p>
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
             <div className="flex items-center space-x-1">
@@ -158,7 +161,7 @@ export default function LoginForm() {
         </Card>
 
         <div className="text-center text-sm text-gray-500">
-          <p>© 2024 VMIS-HRMS. All rights reserved.</p>
+          <p>© 2024 {brandPrefix}-HRMS. All rights reserved.</p>
           <p className="mt-1">SaaS Platform for Vendor Management & HR</p>
         </div>
       </div>
