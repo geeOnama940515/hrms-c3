@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # SaaS Management API
+  subscription-api:
+    build: ./subscription-api
+    container_name: hrms-saas-api
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - CLOUDFLARE_TOKEN=${CLOUDFLARE_TOKEN}
+      - CLOUDFLARE_ZONE_ID=${CLOUDFLARE_ZONE_ID}
+      - NPM_URL=${NPM_URL:-http://nginx-proxy-manager:81}
+      - NPM_TOKEN=${NPM_TOKEN}
+      - PORTAINER_URL=${PORTAINER_URL:-http://portainer:9000}
+      - PORTAINER_TOKEN=${PORTAINER_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./deployments:/home/hrms-deployments
+    networks:
+      - saas-network
+    restart: unless-stopped
+
+  # Frontend for subscription
+  subscription-frontend:
+    image: nginx:alpine
+    container_name: hrms-saas-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - saas-network
+    restart: unless-stopped
+
+  # Database for SaaS management
+  saas-database:
+    image: postgres:15
+    container_name: hrms-saas-db
+    environment:
+      - POSTGRES_DB=hrms_saas
+      - POSTGRES_USER=saas_user
+      - POSTGRES_PASSWORD=secure_password
+    volumes:
+      - saas_db_data:/var/lib/postgresql/data
+    networks:
+      - saas-network
+    restart: unless-stopped
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: hrms-saas-redis
+    networks:
+      - saas-network
+    restart: unless-stopped
+
+volumes:
+  saas_db_data:
+
+networks:
+  saas-network:
+    driver: bridge
