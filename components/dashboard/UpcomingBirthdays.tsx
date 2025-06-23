@@ -9,8 +9,15 @@ import { Cake, Gift, Calendar, Users, ChevronRight } from 'lucide-react';
 import { Employee } from '@/types';
 import { getEmployees } from '@/lib/employees';
 
+// Type for employee with display data
+interface EmployeeDisplayData extends Omit<Employee, 'department' | 'jobTitle' | 'company'> {
+  department?: string;
+  jobTitle?: string;
+  company?: string;
+}
+
 interface UpcomingBirthday {
-  employee: Employee;
+  employee: EmployeeDisplayData;
   daysUntil: number;
   age: number;
   isToday: boolean;
@@ -38,7 +45,7 @@ export default function UpcomingBirthdays() {
     }
   };
 
-  const getUpcomingBirthdays = (employees: Employee[]): UpcomingBirthday[] => {
+  const getUpcomingBirthdays = (employees: EmployeeDisplayData[]): UpcomingBirthday[] => {
     const today = new Date();
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(today.getDate() + 30);
@@ -77,7 +84,7 @@ export default function UpcomingBirthdays() {
     return birthdays.sort((a, b) => a.daysUntil - b.daysUntil);
   };
 
-  const formatBirthdayDate = (employee: Employee, daysUntil: number) => {
+  const formatBirthdayDate = (employee: EmployeeDisplayData, daysUntil: number) => {
     const birthDate = new Date(employee.birthDate);
     const today = new Date();
     const currentYear = today.getFullYear();
@@ -226,7 +233,7 @@ export default function UpcomingBirthdays() {
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 truncate">
-                        {birthday.employee.jobTitle} • {birthday.employee.department}
+                        {birthday.employee.jobTitle ?? 'No Title'} • {birthday.employee.department ?? 'No Department'}
                       </p>
                     </div>
                   </div>
@@ -264,7 +271,7 @@ export default function UpcomingBirthdays() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 truncate">
-                        {birthday.employee.jobTitle} • Turning {birthday.age}
+                        {birthday.employee.jobTitle ?? 'No Title'} • Turning {birthday.age}
                       </p>
                     </div>
                   </div>
@@ -305,7 +312,7 @@ export default function UpcomingBirthdays() {
                           </div>
                         </div>
                         <p className="text-sm text-gray-600 truncate">
-                          {birthday.employee.jobTitle} • Turning {birthday.age}
+                          {birthday.employee.jobTitle ?? 'No Title'} • Turning {birthday.age}
                         </p>
                       </div>
                     </div>

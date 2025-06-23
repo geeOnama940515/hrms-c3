@@ -6,14 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   ArrowLeft, 
   Save, 
   Briefcase,
   Loader2
 } from 'lucide-react';
-import { JobTitle } from '@/types';
-import { createJobTitle, updateJobTitle } from '@/lib/employees';
+import { JobTitle, Department } from '@/types';
+import { createJobTitle, updateJobTitle, getDepartments } from '@/lib/employees';
 import { toast } from 'sonner';
 
 interface JobTitleFormProps {
@@ -25,18 +32,36 @@ interface JobTitleFormProps {
 export default function JobTitleForm({ jobTitle, onBack, onSave }: JobTitleFormProps) {
   const [formData, setFormData] = useState({
     title: '',
-    description: ''
+    description: '',
+    departmentId: ''
   });
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (jobTitle) {
-      setFormData({
-        title: jobTitle.title,
-        description: jobTitle.description || ''
-      });
-    }
+    const loadData = async () => {
+      try {
+        const departmentsData = await getDepartments();
+        setDepartments(departmentsData);
+        
+        if (jobTitle) {
+          setFormData({
+            title: jobTitle.title,
+            description: jobTitle.description || '',
+            departmentId: jobTitle.departmentId
+          });
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast.error('Failed to load departments');
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    loadData();
   }, [jobTitle]);
 
   const validateForm = () => {
@@ -44,6 +69,10 @@ export default function JobTitleForm({ jobTitle, onBack, onSave }: JobTitleFormP
 
     if (!formData.title.trim()) {
       newErrors.title = 'Job title is required';
+    }
+
+    if (!formData.departmentId) {
+      newErrors.departmentId = 'Department is required';
     }
 
     setErrors(newErrors);
@@ -118,6 +147,30 @@ export default function JobTitleForm({ jobTitle, onBack, onSave }: JobTitleFormP
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Department */}
+              <div className="space-y-2">
+                <Label htmlFor="departmentId">Department *</Label>
+                <Select 
+                  value={formData.departmentId} 
+                  onValueChange={(value) => handleInputChange('departmentId', value)}
+                  disabled={loadingData}
+                >
+                  <SelectTrigger className={errors.departmentId ? 'border-red-500' : ''}>
+                    <SelectValue placeholder={loadingData ? "Loading departments..." : "Select department"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map(department => (
+                      <SelectItem key={department.id} value={department.id}>
+                        {department.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.departmentId && (
+                  <p className="text-sm text-red-600">{errors.departmentId}</p>
+                )}
+              </div>
+
               {/* Job Title */}
               <div className="space-y-2">
                 <Label htmlFor="title">Job Title *</Label>

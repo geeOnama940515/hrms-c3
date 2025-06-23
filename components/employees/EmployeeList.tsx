@@ -33,14 +33,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Employee, EmploymentStatus } from '@/types';
+import { Employee, EmploymentStatus, EmployeeDisplayData } from '@/types';
 import { getEmployees, getDepartments } from '@/lib/employees';
 import { useAuth } from '@/contexts/AuthContext';
 import { canEditEmployee, canDeleteEmployee } from '@/lib/auth';
 
 interface EmployeeListProps {
-  onEmployeeSelect: (employee: Employee) => void;
-  onEmployeeEdit: (employee: Employee) => void;
+  onEmployeeSelect: (employee: EmployeeDisplayData) => void;
+  onEmployeeEdit: (employee: EmployeeDisplayData) => void;
   onEmployeeAdd: () => void;
 }
 
@@ -50,12 +50,12 @@ export default function EmployeeList({
   onEmployeeAdd 
 }: EmployeeListProps) {
   const { user } = useAuth();
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeDisplayData[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   useEffect(() => {
     const loadData = async () => {
@@ -81,7 +81,7 @@ export default function EmployeeList({
       employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (employee.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
       employee.employeeNumber.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDepartment = selectedDepartment === 'all' || employee.department === selectedDepartment;

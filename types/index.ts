@@ -67,6 +67,13 @@ export interface Employee {
   payrolls?: Payroll[];
 }
 
+// Type for employee with display data (for UI components)
+export interface EmployeeDisplayData extends Omit<Employee, 'department' | 'jobTitle' | 'company'> {
+  department?: string;
+  jobTitle?: string;
+  company?: string;
+}
+
 export type Gender = 'Male' | 'Female' | 'Other';
 
 export type CivilStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
@@ -111,6 +118,13 @@ export interface LeaveApplication {
   
   createdAt: string;
   updatedAt: string;
+}
+
+// Type for leave application with display data (for UI components)
+export interface LeaveApplicationDisplayData extends Omit<LeaveApplication, 'employee' | 'departmentHead' | 'hrPersonnel'> {
+  employee?: EmployeeDisplayData;
+  departmentHead?: EmployeeDisplayData;
+  hrPersonnel?: EmployeeDisplayData;
 }
 
 export type LeaveType = 'Vacation' | 'Sick' | 'Emergency' | 'Paternity' | 'Maternity' | 'Bereavement' | 'Personal';

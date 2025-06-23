@@ -31,14 +31,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { LeaveApplication } from '@/types';
+import { LeaveApplication, LeaveStatus, LeaveType, EmployeeDisplayData, LeaveApplicationDisplayData } from '@/types';
 import { approveLeaveByDepartmentHead, acknowledgeLeaveByHR, rejectLeaveApplication, getLeaveTypeColor, getStatusColor, getStatusDisplayName } from '@/lib/leaves';
 import { useAuth } from '@/contexts/AuthContext';
 import { canApproveDepartmentLeave, canAcknowledgeLeave } from '@/lib/auth';
 import { toast } from 'sonner';
 
 interface LeaveApplicationDetailProps {
-  leaveApplication: LeaveApplication;
+  leaveApplication: LeaveApplicationDisplayData;
   onBack: () => void;
   onEdit: (leave: LeaveApplication) => void;
   onUpdate: (leave: LeaveApplication) => void;
@@ -84,17 +84,17 @@ export default function LeaveApplicationDetail({
   };
 
   const handleApprove = async () => {
-    if (!user) return;
+    if (!user || !comments.trim()) return;
     
     setLoading(true);
     try {
       const updatedLeave = await approveLeaveByDepartmentHead(
         leaveApplication.id,
         user.id,
-        comments || undefined
+        comments
       );
-      onUpdate(updatedLeave);
-      toast.success('Leave application approved successfully');
+      onUpdate(updatedLeave as LeaveApplication);
+      toast.success('Leave application approved');
       setApprovalDialogOpen(false);
       setComments('');
     } catch (error) {
@@ -115,7 +115,7 @@ export default function LeaveApplicationDetail({
         user.id,
         comments
       );
-      onUpdate(updatedLeave);
+      onUpdate(updatedLeave as LeaveApplication);
       toast.success('Leave application rejected');
       setRejectionDialogOpen(false);
       setComments('');
@@ -137,7 +137,7 @@ export default function LeaveApplicationDetail({
         user.id,
         comments || undefined
       );
-      onUpdate(updatedLeave);
+      onUpdate(updatedLeave as LeaveApplication);
       toast.success('Leave application acknowledged successfully');
       setAcknowledgmentDialogOpen(false);
       setComments('');
@@ -177,7 +177,7 @@ export default function LeaveApplicationDetail({
     }
   };
 
-  const getPaidStatusBadge = (leave: LeaveApplication) => {
+  const getPaidStatusBadge = (leave: LeaveApplicationDisplayData) => {
     if (leave.paidDays > 0 && leave.unpaidDays > 0) {
       return (
         <Badge className="bg-blue-100 text-blue-800">
@@ -217,7 +217,7 @@ export default function LeaveApplicationDetail({
         </div>
         <div className="flex space-x-2">
           {canEdit() && (
-            <Button onClick={() => onEdit(leaveApplication)} variant="outline">
+            <Button onClick={() => onEdit(leaveApplication as LeaveApplication)} variant="outline">
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </Button>

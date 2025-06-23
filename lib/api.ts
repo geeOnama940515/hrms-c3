@@ -42,13 +42,27 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}/api${endpoint}`;
     
-    const headers: HeadersInit = {
+    // Create headers object
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
     };
 
+    // Add Authorization header if token exists
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    // Merge with existing headers from options
+    if (options.headers) {
+      if (options.headers instanceof Headers) {
+        // If it's a Headers object, convert to plain object
+        options.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+      } else if (typeof options.headers === 'object') {
+        // If it's a plain object, spread it
+        Object.assign(headers, options.headers);
+      }
     }
 
     try {

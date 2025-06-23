@@ -32,7 +32,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Department } from '@/types';
+import { Department as DepartmentBase } from '@/types';
+
+// Extend Department to include employeeCount for local use
+type Department = DepartmentBase & { employeeCount: number };
 import { getDepartments, deleteDepartment, getEmployees } from '@/lib/employees';
 import { useAuth } from '@/contexts/AuthContext';
 import { canEditEmployee, canDeleteEmployee } from '@/lib/auth';

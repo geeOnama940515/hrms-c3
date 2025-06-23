@@ -112,7 +112,14 @@ export default function MyProfile() {
       ]);
       
       if (employeeData) {
-        setEmployee(employeeData);
+        // Convert company property if necessary
+        const employee: Employee = {
+          ...employeeData,
+          company: typeof employeeData.company === 'string' ? undefined : employeeData.company,
+          department: typeof employeeData.department === 'string' ? undefined : employeeData.department,
+          jobTitle: typeof employeeData.jobTitle === 'string' ? undefined : employeeData.jobTitle
+        };
+        setEmployee(employee);
         setFormData(prev => ({
           ...prev,
           firstName: employeeData.firstName,
@@ -177,7 +184,7 @@ export default function MyProfile() {
 
     setSaving(true);
     try {
-      const updatedEmployee = await updateEmployee(employee.id, {
+      const updatedEmployeeData = await updateEmployee(employee.id, {
         firstName: formData.firstName,
         lastName: formData.lastName,
         middleName: formData.middleName || undefined,
@@ -192,7 +199,15 @@ export default function MyProfile() {
         pagIbigNumber: formData.pagIbigNumber || undefined,
         tin: formData.tin || undefined
       });
-      
+
+      // Ensure the updated employee matches the Employee type
+      const updatedEmployee: Employee = {
+        ...updatedEmployeeData,
+        company: typeof updatedEmployeeData.company === 'string' ? undefined : updatedEmployeeData.company,
+        department: typeof updatedEmployeeData.department === 'string' ? undefined : updatedEmployeeData.department,
+        jobTitle: typeof updatedEmployeeData.jobTitle === 'string' ? undefined : updatedEmployeeData.jobTitle
+      };
+
       setEmployee(updatedEmployee);
       setEditing(false);
       
@@ -366,12 +381,12 @@ export default function MyProfile() {
                       <div className="flex items-center space-x-2">
                         <Briefcase className="h-4 w-4 text-gray-400" />
                         <span className="text-gray-600">Position:</span>
-                        <span className="font-medium">{employee.jobTitle}</span>
+                        <span className="font-medium">{employee.jobTitle?.title}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Building className="h-4 w-4 text-gray-400" />
                         <span className="text-gray-600">Department:</span>
-                        <span className="font-medium">{employee.department}</span>
+                        <span className="font-medium">{employee.department?.name}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
@@ -569,11 +584,11 @@ export default function MyProfile() {
                   </div>
                   <div>
                     <span className="text-gray-600">Job Title:</span>
-                    <p className="font-medium">{employee.jobTitle}</p>
+                    <p className="font-medium">{employee.jobTitle?.title}</p>
                   </div>
                   <div>
                     <span className="text-gray-600">Department:</span>
-                    <p className="font-medium">{employee.department}</p>
+                    <p className="font-medium">{employee.department?.name}</p>
                   </div>
                   <div>
                     <span className="text-gray-600">Employment Status:</span>

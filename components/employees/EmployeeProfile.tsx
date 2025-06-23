@@ -23,14 +23,14 @@ import {
   Cake,
   Users
 } from 'lucide-react';
-import { Employee, EmploymentStatus } from '@/types';
+import { Employee, EmploymentStatus, EmployeeDisplayData } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { canEditEmployee } from '@/lib/auth';
 
 interface EmployeeProfileProps {
-  employee: Employee;
+  employee: EmployeeDisplayData;
   onBack: () => void;
-  onEdit: (employee: Employee) => void;
+  onEdit: (employee: EmployeeDisplayData) => void;
 }
 
 export default function EmployeeProfile({ employee, onBack, onEdit }: EmployeeProfileProps) {

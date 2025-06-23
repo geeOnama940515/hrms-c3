@@ -31,11 +31,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { JobTitle } from '@/types';
+import { JobTitle, Employee } from '@/types';
 import { getJobTitles, deleteJobTitle, getEmployees } from '@/lib/employees';
 import { useAuth } from '@/contexts/AuthContext';
 import { canEditEmployee, canDeleteEmployee } from '@/lib/auth';
 import { toast } from 'sonner';
+
+// Type for employee with display data
+interface EmployeeDisplayData extends Omit<Employee, 'department' | 'jobTitle'> {
+  department?: string;
+  jobTitle?: string;
+}
 
 interface JobTitleListProps {
   onJobTitleSelect: (jobTitle: JobTitle) => void;
@@ -70,7 +76,7 @@ export default function JobTitleList({
       // Count employees per job title
       const jobTitlesWithCounts = jobTitlesData.map(title => ({
         ...title,
-        employeeCount: employeesData.filter(emp => emp.jobTitle === title.title).length
+        employeeCount: (employeesData as EmployeeDisplayData[]).filter(emp => emp.jobTitle === title.title).length
       }));
       
       setJobTitles(jobTitlesWithCounts);

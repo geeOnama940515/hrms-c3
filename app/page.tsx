@@ -18,7 +18,7 @@ import LeaveApplicationList from '@/components/leaves/LeaveApplicationList';
 import LeaveApplicationForm from '@/components/leaves/LeaveApplicationForm';
 import LeaveApplicationDetail from '@/components/leaves/LeaveApplicationDetail';
 import MyProfile from '@/components/profile/MyProfile';
-import { Employee, Department, JobTitle, LeaveApplication } from '@/types';
+import { Employee, Department, JobTitle, LeaveApplication, EmployeeDisplayData, LeaveApplicationDisplayData } from '@/types';
 import { Loader2, Package, Building2, Users, BarChart3 } from 'lucide-react';
 
 // Get the brand prefix from environment variable, default to 'VMIS'
@@ -27,21 +27,21 @@ const brandPrefix = process.env.NEXT_PUBLIC_APP_BRAND_PREFIX || 'VMIS';
 function Dashboard() {
   const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeDisplayData | null>(null);
   const [isEditingEmployee, setIsEditingEmployee] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [isEditingDepartment, setIsEditingDepartment] = useState(false);
   const [selectedJobTitle, setSelectedJobTitle] = useState<JobTitle | null>(null);
   const [isEditingJobTitle, setIsEditingJobTitle] = useState(false);
-  const [selectedLeave, setSelectedLeave] = useState<LeaveApplication | null>(null);
+  const [selectedLeave, setSelectedLeave] = useState<LeaveApplicationDisplayData | null>(null);
   const [isEditingLeave, setIsEditingLeave] = useState(false);
 
-  const handleEmployeeSelect = (employee: Employee) => {
+  const handleEmployeeSelect = (employee: EmployeeDisplayData) => {
     setSelectedEmployee(employee);
     setIsEditingEmployee(false);
   };
 
-  const handleEmployeeEdit = (employee: Employee) => {
+  const handleEmployeeEdit = (employee: EmployeeDisplayData) => {
     setSelectedEmployee(employee);
     setIsEditingEmployee(true);
   };
@@ -56,7 +56,7 @@ function Dashboard() {
     setIsEditingEmployee(false);
   };
 
-  const handleEmployeeSave = (employee: Employee) => {
+  const handleEmployeeSave = (employee: EmployeeDisplayData) => {
     setSelectedEmployee(employee);
     setIsEditingEmployee(false);
   };
@@ -112,12 +112,12 @@ function Dashboard() {
   };
 
   const handleLeaveSelect = (leave: LeaveApplication) => {
-    setSelectedLeave(leave);
+    setSelectedLeave(leave as LeaveApplicationDisplayData);
     setIsEditingLeave(false);
   };
 
   const handleLeaveEdit = (leave: LeaveApplication) => {
-    setSelectedLeave(leave);
+    setSelectedLeave(leave as LeaveApplicationDisplayData);
     setIsEditingLeave(true);
   };
 
@@ -132,12 +132,12 @@ function Dashboard() {
   };
 
   const handleLeaveSave = (leave: LeaveApplication) => {
-    setSelectedLeave(leave);
+    setSelectedLeave(leave as LeaveApplicationDisplayData);
     setIsEditingLeave(false);
   };
 
   const handleLeaveUpdate = (leave: LeaveApplication) => {
-    setSelectedLeave(leave);
+    setSelectedLeave(leave as LeaveApplicationDisplayData);
   };
 
   if (isLoading) {
@@ -190,7 +190,7 @@ function Dashboard() {
       if (isEditingLeave) {
         return (
           <LeaveApplicationForm
-            leaveApplication={selectedLeave || undefined}
+            leaveApplication={selectedLeave as LeaveApplication || undefined}
             onBack={handleLeaveBackToList}
             onSave={handleLeaveSave}
           />

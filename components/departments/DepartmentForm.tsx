@@ -23,6 +23,13 @@ import { Department, Employee } from '@/types';
 import { createDepartment, updateDepartment, getEmployees } from '@/lib/employees';
 import { toast } from 'sonner';
 
+// Type for employee with display data
+interface EmployeeDisplayData extends Omit<Employee, 'department' | 'jobTitle' | 'company'> {
+  department?: string;
+  jobTitle?: string;
+  company?: string;
+}
+
 interface DepartmentFormProps {
   department?: Department;
   onBack: () => void;
@@ -35,7 +42,7 @@ export default function DepartmentForm({ department, onBack, onSave }: Departmen
     description: '',
     headId: ''
   });
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeDisplayData[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -96,7 +103,8 @@ export default function DepartmentForm({ department, onBack, onSave }: Departmen
         savedDepartment = await createDepartment({
           ...formData,
           description: formData.description || undefined,
-          headId: formData.headId || undefined
+          headId: formData.headId || undefined,
+          companyId: '1'
         });
         toast.success('Department created successfully');
       }
@@ -185,7 +193,7 @@ export default function DepartmentForm({ department, onBack, onSave }: Departmen
                   <SelectContent>
                     {employees.map(employee => (
                       <SelectItem key={employee.id} value={employee.id}>
-                        {employee.firstName} {employee.lastName} - {employee.jobTitle}
+                        {employee.firstName} {employee.lastName} - {employee.jobTitle ?? 'No Title'}
                       </SelectItem>
                     ))}
                   </SelectContent>

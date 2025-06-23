@@ -1,4 +1,4 @@
-import { Employee, Department, JobTitle, Company, EmploymentStatus, Gender, CivilStatus } from '@/types';
+import { Employee, Department, JobTitle, Company, EmploymentStatus, Gender, CivilStatus, EmployeeDisplayData } from '@/types';
 
 // Mock companies
 export const mockCompanies: Company[] = [
@@ -331,7 +331,7 @@ export const mockEmployees: Employee[] = [
 ];
 
 // Helper function to get display names
-export const getEmployeeDisplayData = (employee: Employee) => {
+export const getEmployeeDisplayData = (employee: Employee): EmployeeDisplayData => {
   const department = mockDepartments.find(d => d.id === employee.departmentId);
   const jobTitle = mockJobTitles.find(jt => jt.id === employee.jobTitleId);
   const company = mockCompanies.find(c => c.id === employee.companyId);
@@ -356,18 +356,18 @@ export const getCompanyById = async (id: string): Promise<Company | null> => {
 };
 
 // Employee CRUD operations
-export const getEmployees = async (): Promise<Employee[]> => {
+export const getEmployees = async (): Promise<EmployeeDisplayData[]> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   return mockEmployees.map(getEmployeeDisplayData);
 };
 
-export const getEmployeeById = async (id: string): Promise<Employee | null> => {
+export const getEmployeeById = async (id: string): Promise<EmployeeDisplayData | null> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   const employee = mockEmployees.find(emp => emp.id === id);
   return employee ? getEmployeeDisplayData(employee) : null;
 };
 
-export const createEmployee = async (employee: Omit<Employee, 'id' | 'createdAt' | 'updatedAt'>): Promise<Employee> => {
+export const createEmployee = async (employee: Omit<Employee, 'id' | 'createdAt' | 'updatedAt'>): Promise<EmployeeDisplayData> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   const newEmployee: Employee = {
     ...employee,
@@ -379,7 +379,7 @@ export const createEmployee = async (employee: Omit<Employee, 'id' | 'createdAt'
   return getEmployeeDisplayData(newEmployee);
 };
 
-export const updateEmployee = async (id: string, updates: Partial<Employee>): Promise<Employee> => {
+export const updateEmployee = async (id: string, updates: Partial<Employee>): Promise<EmployeeDisplayData> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   const index = mockEmployees.findIndex(emp => emp.id === id);
   if (index === -1) throw new Error('Employee not found');

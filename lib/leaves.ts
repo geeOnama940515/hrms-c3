@@ -1,4 +1,4 @@
-import { LeaveApplication, LeaveBalance, LeaveType, LeaveStatus, Employee, LeaveDay } from '@/types';
+import { LeaveApplication, LeaveBalance, LeaveType, LeaveStatus, Employee, LeaveDay, EmployeeDisplayData, LeaveApplicationDisplayData } from '@/types';
 import { mockEmployees, getEmployeeDisplayData } from './employees';
 
 // Mock leave balances - simplified to track only paid leave
@@ -167,9 +167,9 @@ export const getLeaveApplications = async (filters?: {
   startDate?: string;
   endDate?: string;
 }): Promise<LeaveApplication[]> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 300));
   
-  let filteredApplications = mockLeaveApplications;
+  let filteredApplications = [...mockLeaveApplications];
   
   if (filters) {
     if (filters.employeeId) {
@@ -192,13 +192,13 @@ export const getLeaveApplications = async (filters?: {
     }
   }
   
-  return filteredApplications.map(getLeaveApplicationDisplayData);
+  return filteredApplications;
 };
 
 export const getLeaveApplicationById = async (id: string): Promise<LeaveApplication | null> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   const application = mockLeaveApplications.find(app => app.id === id);
-  return application ? getLeaveApplicationDisplayData(application) : null;
+  return application || null;
 };
 
 export const createLeaveApplication = async (
@@ -216,7 +216,7 @@ export const createLeaveApplication = async (
   };
   
   mockLeaveApplications.push(newApplication);
-  return getLeaveApplicationDisplayData(newApplication);
+  return newApplication;
 };
 
 export const updateLeaveApplication = async (
@@ -241,7 +241,7 @@ export const updateLeaveApplication = async (
     await updateLeaveBalance(updatedApplication.employeeId, updatedApplication.paidDays);
   }
   
-  return getLeaveApplicationDisplayData(updatedApplication);
+  return updatedApplication;
 };
 
 export const approveLeaveByDepartmentHead = async (
@@ -266,7 +266,7 @@ export const approveLeaveByDepartmentHead = async (
   };
   
   mockLeaveApplications[index] = updatedApplication;
-  return getLeaveApplicationDisplayData(updatedApplication);
+  return updatedApplication;
 };
 
 export const acknowledgeLeaveByHR = async (
@@ -302,7 +302,7 @@ export const acknowledgeLeaveByHR = async (
     await updateLeaveBalance(updatedApplication.employeeId, updatedApplication.paidDays);
   }
   
-  return getLeaveApplicationDisplayData(updatedApplication);
+  return updatedApplication;
 };
 
 export const rejectLeaveApplication = async (
@@ -327,7 +327,7 @@ export const rejectLeaveApplication = async (
   };
   
   mockLeaveApplications[index] = updatedApplication;
-  return getLeaveApplicationDisplayData(updatedApplication);
+  return updatedApplication;
 };
 
 export const deleteLeaveApplication = async (id: string): Promise<void> => {
