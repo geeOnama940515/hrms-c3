@@ -2,40 +2,18 @@ version: '3.8'
 
 services:
   hrms:
-    build: 
+    build:
       context: .
-      args:
-        NEXT_PUBLIC_APP_BRAND_PREFIX: ${NEXT_PUBLIC_APP_BRAND_PREFIX:-VMIS}
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
-    container_name: ${CONTAINER_NAME:-vmis-hrms}
+    container_name: vmis-hrms
     ports:
-      - "${PORT:-3000}:3000"
+      - "5566:3000"
     environment:
-      - NEXT_PUBLIC_APP_BRAND_PREFIX=${NEXT_PUBLIC_APP_BRAND_PREFIX:-VMIS}
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NEXT_PUBLIC_APP_BRAND_PREFIX=VMIS-HRMS
+      - NEXT_PUBLIC_API_URL=http://localhost:5566
     restart: unless-stopped
     networks:
       - hrms-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${CONTAINER_NAME:-vmis-hrms}.rule=Host(`${DOMAIN:-localhost}`)"
-      - "traefik.http.services.${CONTAINER_NAME:-vmis-hrms}.loadbalancer.server.port=3000"
 
 networks:
   hrms-network:
     driver: bridge
-
-# Example usage:
-# 1. Default deployment:
-#    docker-compose up -d
-#
-# 2. Custom branding:
-#    NEXT_PUBLIC_APP_BRAND_PREFIX=VDC CONTAINER_NAME=vdc-hrms DOMAIN=vdc.yourdomain.com docker-compose up -d
-#
-# 3. With environment file:
-#    Create .env file with:
-#    NEXT_PUBLIC_APP_BRAND_PREFIX=ABC
-#    CONTAINER_NAME=abc-hrms
-#    DOMAIN=abc.yourdomain.com
-#    PORT=3001
-#    Then run: docker-compose up -d
