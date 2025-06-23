@@ -61,6 +61,33 @@ export default function EmployeeForm({ employee, onBack, onSave }: EmployeeFormP
   const [loadingData, setLoadingData] = useState(true);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Add useEffect to update form data when employee prop changes
+  useEffect(() => {
+    if (employee) {
+      setFormData({
+        firstName: employee.firstName || '',
+        lastName: employee.lastName || '',
+        middleName: employee.middleName || '',
+        birthDate: employee.birthDate ? employee.birthDate.split('T')[0] : '',
+        gender: employee.gender || '',
+        civilStatus: employee.civilStatus || '',
+        email: employee.email || '',
+        phoneNumber: employee.phoneNumber || '',
+        address: employee.address || '',
+        sssNumber: employee.sssNumber || '',
+        philHealthNumber: employee.philHealthNumber || '',
+        pagIbigNumber: employee.pagIbigNumber || '',
+        tin: employee.tin || '',
+        dateHired: employee.dateHired ? employee.dateHired.split('T')[0] : '',
+        employmentStatus: employee.employmentStatus || '',
+        departmentId: employee.departmentId || '',
+        jobTitleId: employee.jobTitleId || '',
+        employeeNumber: employee.employeeNumber || '',
+        companyId: employee.companyId || 'company-1',
+      });
+    }
+  }, [employee]);
+
   useEffect(() => {
     async function loadInitialData() {
       setLoadingData(true);
@@ -150,7 +177,7 @@ export default function EmployeeForm({ employee, onBack, onSave }: EmployeeFormP
       };
 
       let savedEmployee: EmployeeDisplayData;
-      if (employee) {
+      if (employee && employee.id) {
         savedEmployee = await updateEmployee(employee.id, employeeData);
         toast.success('Employee updated successfully');
       } else {

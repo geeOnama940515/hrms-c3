@@ -166,7 +166,7 @@ export const getLeaveApplications = async (filters?: {
   status?: LeaveStatus;
   startDate?: string;
   endDate?: string;
-}): Promise<LeaveApplication[]> => {
+}): Promise<LeaveApplicationDisplayData[]> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   
   let filteredApplications = [...mockLeaveApplications];
@@ -192,13 +192,13 @@ export const getLeaveApplications = async (filters?: {
     }
   }
   
-  return filteredApplications;
+  return filteredApplications.map(getLeaveApplicationDisplayData);
 };
 
-export const getLeaveApplicationById = async (id: string): Promise<LeaveApplication | null> => {
+export const getLeaveApplicationById = async (id: string): Promise<LeaveApplicationDisplayData | null> => {
   await new Promise(resolve => setTimeout(resolve, 300));
   const application = mockLeaveApplications.find(app => app.id === id);
-  return application || null;
+  return application ? getLeaveApplicationDisplayData(application) : null;
 };
 
 export const createLeaveApplication = async (

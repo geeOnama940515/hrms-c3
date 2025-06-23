@@ -43,15 +43,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { LeaveApplication, LeaveStatus, LeaveType } from '@/types';
+import { LeaveApplication, LeaveStatus, LeaveType, LeaveApplicationDisplayData } from '@/types';
 import { getLeaveApplications, deleteLeaveApplication, getLeaveTypeColor, getStatusColor, getStatusDisplayName } from '@/lib/leaves';
 import { useAuth } from '@/contexts/AuthContext';
 import { canApplyLeave, canViewAllLeaves, canViewDepartmentLeaves, getAccessLevel } from '@/lib/auth';
 import { toast } from 'sonner';
 
 interface LeaveApplicationListProps {
-  onLeaveSelect: (leave: LeaveApplication) => void;
-  onLeaveEdit: (leave: LeaveApplication) => void;
+  onLeaveSelect: (leave: LeaveApplicationDisplayData) => void;
+  onLeaveEdit: (leave: LeaveApplicationDisplayData) => void;
   onLeaveAdd: () => void;
 }
 
@@ -61,14 +61,14 @@ export default function LeaveApplicationList({
   onLeaveAdd 
 }: LeaveApplicationListProps) {
   const { user } = useAuth();
-  const [leaves, setLeaves] = useState<LeaveApplication[]>([]);
+  const [leaves, setLeaves] = useState<LeaveApplicationDisplayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [paidFilter, setPaidFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [leaveToDelete, setLeaveToDelete] = useState<LeaveApplication | null>(null);
+  const [leaveToDelete, setLeaveToDelete] = useState<LeaveApplicationDisplayData | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function LeaveApplicationList({
     return matchesSearch && matchesStatus && matchesType && matchesPaid;
   });
 
-  const handleDeleteClick = (leave: LeaveApplication) => {
+  const handleDeleteClick = (leave: LeaveApplicationDisplayData) => {
     setLeaveToDelete(leave);
     setDeleteDialogOpen(true);
   };
@@ -167,17 +167,17 @@ export default function LeaveApplicationList({
     }
   };
 
-  const canEditLeave = (leave: LeaveApplication): boolean => {
+  const canEditLeave = (leave: LeaveApplicationDisplayData): boolean => {
     // Only the applicant can edit, and only if it's still pending
     return leave.status === 'Pending' && leave.employeeId === '1'; // In real app, check against user ID
   };
 
-  const canDeleteLeave = (leave: LeaveApplication): boolean => {
+  const canDeleteLeave = (leave: LeaveApplicationDisplayData): boolean => {
     // Only the applicant can delete, and only if it's still pending
     return leave.status === 'Pending' && leave.employeeId === '1'; // In real app, check against user ID
   };
 
-  const getPaidStatusBadge = (leave: LeaveApplication) => {
+  const getPaidStatusBadge = (leave: LeaveApplicationDisplayData) => {
     if (leave.paidDays > 0 && leave.unpaidDays > 0) {
       return (
         <Badge className="bg-blue-100 text-blue-800">

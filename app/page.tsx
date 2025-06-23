@@ -111,13 +111,13 @@ function Dashboard() {
     setIsEditingJobTitle(false);
   };
 
-  const handleLeaveSelect = (leave: LeaveApplication) => {
-    setSelectedLeave(leave as LeaveApplicationDisplayData);
+  const handleLeaveSelect = (leave: LeaveApplicationDisplayData) => {
+    setSelectedLeave(leave);
     setIsEditingLeave(false);
   };
 
-  const handleLeaveEdit = (leave: LeaveApplication) => {
-    setSelectedLeave(leave as LeaveApplicationDisplayData);
+  const handleLeaveEdit = (leave: LeaveApplicationDisplayData) => {
+    setSelectedLeave(leave);
     setIsEditingLeave(true);
   };
 
@@ -132,12 +132,115 @@ function Dashboard() {
   };
 
   const handleLeaveSave = (leave: LeaveApplication) => {
-    setSelectedLeave(leave as LeaveApplicationDisplayData);
+    // Convert LeaveApplication to LeaveApplicationDisplayData
+    const leaveDisplayData: LeaveApplicationDisplayData = {
+      ...leave,
+      employee: leave.employee ? {
+        ...leave.employee,
+        department: leave.employee.department?.name,
+        jobTitle: leave.employee.jobTitle?.title,
+        company: leave.employee.company?.name
+      } as EmployeeDisplayData : undefined,
+      departmentHead: leave.departmentHead ? {
+        ...leave.departmentHead,
+        department: leave.departmentHead.department?.name,
+        jobTitle: leave.departmentHead.jobTitle?.title,
+        company: leave.departmentHead.company?.name
+      } as EmployeeDisplayData : undefined,
+      hrPersonnel: leave.hrPersonnel ? {
+        ...leave.hrPersonnel,
+        department: leave.hrPersonnel.department?.name,
+        jobTitle: leave.hrPersonnel.jobTitle?.title,
+        company: leave.hrPersonnel.company?.name
+      } as EmployeeDisplayData : undefined
+    };
+    setSelectedLeave(leaveDisplayData);
     setIsEditingLeave(false);
   };
 
   const handleLeaveUpdate = (leave: LeaveApplication) => {
-    setSelectedLeave(leave as LeaveApplicationDisplayData);
+    // Convert LeaveApplication to LeaveApplicationDisplayData
+    const leaveDisplayData: LeaveApplicationDisplayData = {
+      ...leave,
+      employee: leave.employee ? {
+        ...leave.employee,
+        department: leave.employee.department?.name,
+        jobTitle: leave.employee.jobTitle?.title,
+        company: leave.employee.company?.name
+      } as EmployeeDisplayData : undefined,
+      departmentHead: leave.departmentHead ? {
+        ...leave.departmentHead,
+        department: leave.departmentHead.department?.name,
+        jobTitle: leave.departmentHead.jobTitle?.title,
+        company: leave.departmentHead.company?.name
+      } as EmployeeDisplayData : undefined,
+      hrPersonnel: leave.hrPersonnel ? {
+        ...leave.hrPersonnel,
+        department: leave.hrPersonnel.department?.name,
+        jobTitle: leave.hrPersonnel.jobTitle?.title,
+        company: leave.hrPersonnel.company?.name
+      } as EmployeeDisplayData : undefined
+    };
+    setSelectedLeave(leaveDisplayData);
+  };
+
+  // Wrapper function for LeaveApplicationForm onSave callback
+  const handleLeaveFormSave = (leave: LeaveApplication) => {
+    handleLeaveSave(leave);
+  };
+
+  // Wrapper functions for LeaveApplicationDetail callbacks
+  const handleLeaveDetailEdit = (leave: LeaveApplication) => {
+    // Convert LeaveApplication to LeaveApplicationDisplayData
+    const leaveDisplayData: LeaveApplicationDisplayData = {
+      ...leave,
+      employee: leave.employee ? {
+        ...leave.employee,
+        department: leave.employee.department?.name,
+        jobTitle: leave.employee.jobTitle?.title,
+        company: leave.employee.company?.name
+      } as EmployeeDisplayData : undefined,
+      departmentHead: leave.departmentHead ? {
+        ...leave.departmentHead,
+        department: leave.departmentHead.department?.name,
+        jobTitle: leave.departmentHead.jobTitle?.title,
+        company: leave.departmentHead.company?.name
+      } as EmployeeDisplayData : undefined,
+      hrPersonnel: leave.hrPersonnel ? {
+        ...leave.hrPersonnel,
+        department: leave.hrPersonnel.department?.name,
+        jobTitle: leave.hrPersonnel.jobTitle?.title,
+        company: leave.hrPersonnel.company?.name
+      } as EmployeeDisplayData : undefined
+    };
+    setSelectedLeave(leaveDisplayData);
+    setIsEditingLeave(true);
+  };
+
+  const handleLeaveDetailUpdate = (leave: LeaveApplication) => {
+    // Convert LeaveApplication to LeaveApplicationDisplayData
+    const leaveDisplayData: LeaveApplicationDisplayData = {
+      ...leave,
+      employee: leave.employee ? {
+        ...leave.employee,
+        department: leave.employee.department?.name,
+        jobTitle: leave.employee.jobTitle?.title,
+        company: leave.employee.company?.name
+      } as EmployeeDisplayData : undefined,
+      departmentHead: leave.departmentHead ? {
+        ...leave.departmentHead,
+        department: leave.departmentHead.department?.name,
+        jobTitle: leave.departmentHead.jobTitle?.title,
+        company: leave.departmentHead.company?.name
+      } as EmployeeDisplayData : undefined,
+      hrPersonnel: leave.hrPersonnel ? {
+        ...leave.hrPersonnel,
+        department: leave.hrPersonnel.department?.name,
+        jobTitle: leave.hrPersonnel.jobTitle?.title,
+        company: leave.hrPersonnel.company?.name
+      } as EmployeeDisplayData : undefined
+    };
+    setSelectedLeave(leaveDisplayData);
   };
 
   if (isLoading) {
@@ -160,6 +263,7 @@ function Dashboard() {
       if (isEditingEmployee) {
         return (
           <EmployeeForm
+            key={selectedEmployee?.id || 'new'}
             employee={selectedEmployee || undefined}
             onBack={handleEmployeeBackToList}
             onSave={handleEmployeeSave}
@@ -188,11 +292,35 @@ function Dashboard() {
 
     if (activeTab === 'leaves') {
       if (isEditingLeave) {
+        // Convert LeaveApplicationDisplayData back to LeaveApplication for the form
+        const leaveForForm = selectedLeave ? {
+          ...selectedLeave,
+          employee: selectedLeave.employee ? {
+            ...selectedLeave.employee,
+            department: selectedLeave.employee.department ? { name: selectedLeave.employee.department } as any : undefined,
+            jobTitle: selectedLeave.employee.jobTitle ? { title: selectedLeave.employee.jobTitle } as any : undefined,
+            company: selectedLeave.employee.company ? { name: selectedLeave.employee.company } as any : undefined
+          } as any : undefined,
+          departmentHead: selectedLeave.departmentHead ? {
+            ...selectedLeave.departmentHead,
+            department: selectedLeave.departmentHead.department ? { name: selectedLeave.departmentHead.department } as any : undefined,
+            jobTitle: selectedLeave.departmentHead.jobTitle ? { title: selectedLeave.departmentHead.jobTitle } as any : undefined,
+            company: selectedLeave.departmentHead.company ? { name: selectedLeave.departmentHead.company } as any : undefined
+          } as any : undefined,
+          hrPersonnel: selectedLeave.hrPersonnel ? {
+            ...selectedLeave.hrPersonnel,
+            department: selectedLeave.hrPersonnel.department ? { name: selectedLeave.hrPersonnel.department } as any : undefined,
+            jobTitle: selectedLeave.hrPersonnel.jobTitle ? { title: selectedLeave.hrPersonnel.jobTitle } as any : undefined,
+            company: selectedLeave.hrPersonnel.company ? { name: selectedLeave.hrPersonnel.company } as any : undefined
+          } as any : undefined
+        } as LeaveApplication : undefined;
+
         return (
           <LeaveApplicationForm
-            leaveApplication={selectedLeave as LeaveApplication || undefined}
+            key={selectedLeave?.id || 'new'}
+            leaveApplication={leaveForForm}
             onBack={handleLeaveBackToList}
-            onSave={handleLeaveSave}
+            onSave={handleLeaveFormSave}
           />
         );
       }
@@ -202,8 +330,8 @@ function Dashboard() {
           <LeaveApplicationDetail
             leaveApplication={selectedLeave}
             onBack={handleLeaveBackToList}
-            onEdit={handleLeaveEdit}
-            onUpdate={handleLeaveUpdate}
+            onEdit={handleLeaveDetailEdit}
+            onUpdate={handleLeaveDetailUpdate}
           />
         );
       }
@@ -221,6 +349,7 @@ function Dashboard() {
       if (isEditingDepartment) {
         return (
           <DepartmentForm
+            key={selectedDepartment?.id || 'new'}
             department={selectedDepartment || undefined}
             onBack={handleDepartmentBackToList}
             onSave={handleDepartmentSave}
@@ -250,6 +379,7 @@ function Dashboard() {
       if (isEditingJobTitle) {
         return (
           <JobTitleForm
+            key={selectedJobTitle?.id || 'new'}
             jobTitle={selectedJobTitle || undefined}
             onBack={handleJobTitleBackToList}
             onSave={handleJobTitleSave}
