@@ -3,9 +3,11 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy and install dependencies
+# Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
+
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -22,21 +24,25 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Copy built app
-COPY --from=builder /app/out ./out
-COPY --from=builder /app/package.json ./
-
-# Serve static files
-RUN npm install -g serve
-
 # Use non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Copy built application
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Set ownership
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 
 EXPOSE 3000
 
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/ || exit 1
 
-CMD ["serve", "-s", "out", "-l", "3000"]
+CMD ["node", "server.js"]
